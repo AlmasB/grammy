@@ -1,0 +1,4 @@
+{
+  "animal": ["unicorn","raven"],
+  "randomAnimal": ["#animal#"]
+}
