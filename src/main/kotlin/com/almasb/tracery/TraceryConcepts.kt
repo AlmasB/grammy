@@ -90,9 +90,9 @@ class Grammar() {
             return s
 
         var newS = s
-        val symbols2 = s.getSymbols()
+        val symbolKeys = s.getSymbolKeys()
 
-        symbols2.forEach {
+        symbolKeys.forEach {
 
             //println("parsing: $it")
 
@@ -107,23 +107,11 @@ class Grammar() {
 
                 //println(modifiers)
 
-                modifiers.forEach {
-                    when (it) {
-                        "capitalize" -> {
-                            val char0 = replacedValue.take(1)
+                modifiers.forEach { modifierName ->
 
-                            replacedValue = char0.toUpperCase() + replacedValue.drop(1)
-                        }
-
-                        "s" -> {
-                            replacedValue = replacedValue + "s"
-                        }
-
-                        "a" -> {
-                            replacedValue = "a " + replacedValue
-                        }
-                        else -> TODO(it)
-                    }
+                    // TODO: if not found
+                    // TODO: args
+                    replacedValue = ENG_MODIFIERS.find { it.name == modifierName }!!.apply(replacedValue)
                 }
             }
 
@@ -131,6 +119,20 @@ class Grammar() {
         }
 
         return newS
+    }
+
+    private fun String.getSymbolKeys(): List<String> {
+
+        val m = Pattern.compile(Pattern.quote("#") + "(.*?)" + Pattern.quote("#")).matcher(this)
+
+        val result = arrayListOf<String>()
+
+        while (m.find()) {
+            val match = m.group(1)
+            result.add(match)
+        }
+
+        return result
     }
 
     fun fromJSON(json: String) {
@@ -147,20 +149,6 @@ class Grammar() {
         // TODO:
         return jacksonObjectMapper().writeValueAsString(symbols)
     }
-}
-
-fun String.getSymbols(): List<String> {
-
-    val m = Pattern.compile(Pattern.quote("#") + "(.*?)" + Pattern.quote("#")).matcher(this)
-
-    val result = arrayListOf<String>()
-
-    while (m.find()) {
-        val match = m.group(1)
-        result.add(match)
-    }
-
-    return result
 }
 
 class Symbol(val key: String, val ruleset: Set<Rule>) {

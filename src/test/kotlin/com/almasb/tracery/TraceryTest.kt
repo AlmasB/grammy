@@ -67,7 +67,7 @@ class TraceryTest {
         val grammar = Tracery.createGrammar(json)
         val expandedText = grammar.flatten("#sentence#")
 
-        assertThat(expandedText, `is`("Purple unicorns are always wistful. A owl is always wistful, unless it is a orange one."))
+        assertThat(expandedText, `is`("Purple unicorns are always wistful. An owl is always wistful, unless it is an orange one."))
     }
 
     private fun readJSON(fileName: String): String {
