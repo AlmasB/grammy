@@ -83,7 +83,7 @@ class TraceryTest {
         val grammar = Tracery.createGrammar(json)
         val expandedText = grammar.flatten("#sentence#")
 
-        assertThat(expandedText, `is`("Purple unicorns are always wistful. An owl is always wistful, unless it is an orange one."))
+        assertThat(expandedText, `is`("Purple unicorns are always wistful. An owl is often courteous, unless it is an orange one."))
     }
 
     @Test
@@ -97,6 +97,16 @@ class TraceryTest {
         val expandedText = grammar.flatten("#sentence#")
 
         assertThat(expandedText, `is`("The purple unicorn of the mountain is called Darcy"))
+    }
+
+    @Test
+    fun `Write to JSON`() {
+        val json = readJSON("modifiers.json")
+
+        val grammar = Tracery.createGrammar(json)
+        val generated = grammar.toJSON()
+
+        assertThat(generated.replace("\n", ""), `is`(json))
     }
 
     private fun readJSON(fileName: String): String {
