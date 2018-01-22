@@ -13,6 +13,9 @@ import java.util.regex.Pattern
  * @author Almas Baimagambetov (almaslvl@gmail.com)
  */
 
+private val SYMBOL_OPERATOR = "#"
+private val MODIFIER_OPERATOR = "."
+
 /**
  * Currently just a text wrapper, but can be made more powerful in the future, e.g. with states.
  *
@@ -86,57 +89,55 @@ class Grammar() {
         // TODO: drop hashtags?
         val firstSymbol = symbols[startSymbolKey.drop(1).dropLast(1)] ?: throw IllegalArgumentException("Symbol key <$startSymbolKey> not found!")
 
-        var sentence = firstSymbol.ruleset.joinToString(" ")
+        val sentence = firstSymbol.ruleset.joinToString(" ")
 
         return expand(sentence)
     }
 
     private fun expand(s: String): String {
-        if (!s.contains('#'))
+        if (!s.hasSymbols())
             return s
 
-        var newS = s
-        val symbolKeys = s.getSymbolKeys()
+        var result = s
 
-        symbolKeys.forEach {
+        s.getSymbolKeys().forEach {
 
-            //println("parsing: $it")
+            // "it" is of form key.mod.mod where mods are optional
 
+            // in case we have modifiers
             val symbolName = it.substringBefore(".")
 
+            // TODO: symbol not found
             val newValue = symbols[symbolName]!!.selectRule().text
 
             var replacedValue = expand(newValue)
 
-            // TODO: extract apply modifiers
-            if (it.contains(".")) {
-                val modifiers = it.split(".").drop(1)
-
-                //println(modifiers)
-
-                modifiers.forEach { modifierName ->
-
-                    // TODO: if not found
-                    // TODO: args
-                    replacedValue = ENG_MODIFIERS.find { it.name == modifierName }!!.apply(replacedValue)
-                }
+            if (it.hasModifiers()) {
+                replacedValue = applyModifiers(replacedValue, it.split(".").drop(1))
             }
 
-            newS = newS.replaceFirst("#$it#", replacedValue)
+            result = result.replaceFirst("#$it#", replacedValue)
         }
 
-        return newS
+        return result
     }
 
-    private fun String.getSymbolKeys(): List<String> {
+    /**
+     * [input] is the text on which to apply modifiers.
+     */
+    private fun applyModifiers(input: String, modifierNames: List<String>): String {
+        var result = input
 
-        val m = Pattern.compile(Pattern.quote("#") + "(.*?)" + Pattern.quote("#")).matcher(this)
+        modifierNames.forEach { name ->
 
-        val result = arrayListOf<String>()
+            // check if a modifier has params (function call)
+            if (name.contains("(")) {
+                // TODO: split the name and args, call apply appropriately
+            } else {
+                val modifier = ENG_MODIFIERS.find { it.name == name } ?: throw IllegalArgumentException("Modifier $name not found!")
 
-        while (m.find()) {
-            val match = m.group(1)
-            result.add(match)
+                result = modifier.apply(result)
+            }
         }
 
         return result
@@ -173,4 +174,23 @@ class Grammar() {
 
         return sb.toString()
     }
+}
+
+private fun String.hasSymbols(): Boolean = this.contains(SYMBOL_OPERATOR)
+private fun String.hasModifiers(): Boolean = this.contains(MODIFIER_OPERATOR)
+
+private val symbolKeyPattern = Pattern.compile(Pattern.quote("#") + "(.*?)" + Pattern.quote("#"))
+
+private fun String.getSymbolKeys(): List<String> {
+    val m = symbolKeyPattern.matcher(this)
+
+    val result = arrayListOf<String>()
+
+    while (m.find()) {
+        // given #key#, match == key
+        val match = m.group(1)
+        result.add(match)
+    }
+
+    return result
 }
