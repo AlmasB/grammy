@@ -17,6 +17,8 @@ import java.util.*
  */
 class TraceryTest {
 
+    // TODO: extract common code from tests
+
     @Test
     fun `Basic syntax 1`() {
 
@@ -68,6 +70,19 @@ class TraceryTest {
         val expandedText = grammar.flatten("#sentence#")
 
         assertThat(expandedText, `is`("Purple unicorns are always wistful. An owl is always wistful, unless it is an orange one."))
+    }
+
+    @Test
+    fun `Recursive`() {
+
+        Tracery.setRandom(Random(15))
+
+        val json = readJSON("recursive.json")
+
+        val grammar = Tracery.createGrammar(json)
+        val expandedText = grammar.flatten("#sentence#")
+
+        assertThat(expandedText, `is`("The purple unicorn of the mountain is called Darcy"))
     }
 
     private fun readJSON(fileName: String): String {
