@@ -73,6 +73,10 @@ class Grammar() {
 
     private val symbols: HashMap<String, Symbol> = hashMapOf()
 
+    fun addSymbol(symbol: Symbol) {
+        symbols[symbol.key] = symbol
+    }
+
     fun flatten() = flatten("#origin#")
 
     fun flatten(startSymbolKey: String): String {
@@ -102,6 +106,7 @@ class Grammar() {
 
             var replacedValue = expand(newValue)
 
+            // TODO: extract apply modifiers
             if (it.contains(".")) {
                 val modifiers = it.split(".").drop(1)
 
@@ -115,7 +120,7 @@ class Grammar() {
                 }
             }
 
-            newS = newS.replace("#$it#", replacedValue)
+            newS = newS.replaceFirst("#$it#", replacedValue)
         }
 
         return newS

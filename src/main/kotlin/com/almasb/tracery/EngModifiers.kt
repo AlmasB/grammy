@@ -11,30 +11,56 @@ val ENG_MODIFIERS = load()
 
 private fun load(): List<Modifier> {
 
+    // TODO: tighter defn for modifiers, e.g. text (s) cannot be empty
+
     add("capitalize", { s, args ->
         if (s.isEmpty())
             return@add s
 
-        val char0 = s[0]
-        char0.toUpperCase() + s.drop(1)
+        s.first().toUpperCase() + s.drop(1)
     })
 
-
     add("s", { s, args ->
+        if (s.isEmpty())
+            return@add s
+
+        when (s.last()) {
+            in "shx" -> return@add s + "es"
+            'y' -> {
+                if (!s.dropLast(1).last().isVowel()) {
+                    return@add s.dropLast(1) + "ies"
+                }
+            }
+        }
+
         s + "s"
+    })
+
+    add("ed", { s, args ->
+        if (s.isEmpty())
+            return@add s
+
+        return@add when (s.last()) {
+            //in "shx" -> s + "ed"
+            'e' -> s + "d"
+            'y' -> {
+                if (!s.dropLast(1).last().isVowel()) {
+                    s.dropLast(1) + "ied"
+                } else {
+                    s + "d"
+                }
+            }
+            else -> s + "ed"
+        }
     })
 
     add("a", { s, args ->
         if (s.isNotEmpty()) {
-            if (s[0] in "uU") {
-                if (s.length > 2) {
-                    if (s[2] in "iI") {
-                        return@add "a " + s
-                    }
-                }
+            if (s[0] in "uU" && s.length > 2 && s[2] in "iI") {
+                return@add "a " + s
             }
 
-            if (s[0] in "aeiouAEIOU") {
+            if (s[0].isVowel()) {
                 return@add "an " + s
             }
         }
@@ -53,3 +79,5 @@ private fun add(name: String, func: (String, Array<String>) -> String) {
         }
     })
 }
+
+private fun Char.isVowel() = this in "aeiouAEIOU"

@@ -3,8 +3,7 @@ package com.almasb.tracery
 import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
-import org.hamcrest.Matchers.`is`
-import org.hamcrest.Matchers.either
+import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -57,6 +56,21 @@ class TraceryTest {
         expandedText = grammar.flatten("#sentence#")
 
         assertThat(expandedText, `is`("The purple owl of the mountain is called Mia"))
+    }
+
+    @Test
+    fun `The same symbol expands to random text`() {
+
+        Tracery.setRandom(Random(0))
+
+        val json = readJSON("simple4.json")
+
+        val grammar = Tracery.createGrammar(json)
+        val expandedText = grammar.flatten("#sentence#")
+
+        val tokens = expandedText.split(",")
+
+        assertThat(tokens[0], `is`(not(tokens[1])))
     }
 
     @Test
