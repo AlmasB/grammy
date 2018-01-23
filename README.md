@@ -1,6 +1,7 @@
 ### About
 This is a JVM port of Kate Compton's story-grammar generator - [Tracery](https://github.com/galaxykate/tracery) 
 
+![Maven](https://img.shields.io/maven-central/v/com.github.almasb/tracery.svg)
 [![Build Status](https://travis-ci.org/AlmasB/tracery.svg?branch=master)](https://travis-ci.org/AlmasB/tracery)
 [![codecov](https://codecov.io/gh/AlmasB/tracery/branch/master/graph/badge.svg)](https://codecov.io/gh/AlmasB/tracery)
 
@@ -53,6 +54,26 @@ Possible Output:
 ```
 The orange zebra of the sky is called Mia
 ```
+
+### Maven
+
+```
+<dependency>
+    <groupId>com.github.almasb</groupId>
+    <artifactId>tracery</artifactId>
+    <version>0.0.1</version>
+</dependency>
+```
+
+### Gradle
+
+```
+compile 'com.github.almasb:tracery:0.0.1'
+```
+
+### Uber-jar
+
+Pre-compiled version available from [Releases](https://github.com/AlmasB/tracery/releases).
 
 ### Notes
 
