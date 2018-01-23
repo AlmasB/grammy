@@ -7,6 +7,8 @@ import java.util.Random;
  */
 public final class Tracery {
 
+    private Tracery() {}
+
     static Random random = new Random();
 
     /**

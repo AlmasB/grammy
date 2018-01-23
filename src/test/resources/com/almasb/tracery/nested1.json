@@ -1,0 +1,6 @@
+{
+  "animal": ["{{randomAnimal}}"],
+  "animal1": ["zebra"],
+  "animal2": ["horse"],
+  "randomAnimal": ["animal1", "animal2"]
+}

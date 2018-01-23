@@ -77,49 +77,116 @@ class Action() {
 class Grammar() {
 
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
+    private val runtimeSymbols: HashMap<String, Symbol> = linkedMapOf()
 
     fun addSymbol(symbol: Symbol) {
         symbols[symbol.key] = symbol
     }
 
-    fun flatten() = flatten("#origin#")
+    fun flatten() = flatten("origin")
 
     fun flatten(startSymbolKey: String): String {
 
-        // TODO: drop hashtags?
-        val firstSymbol = symbols[startSymbolKey.drop(1).dropLast(1)] ?: throw IllegalArgumentException("Symbol key <$startSymbolKey> not found!")
+        val firstSymbol = symbols[startSymbolKey] ?: throw IllegalArgumentException("Symbol key \"$startSymbolKey\" not found!")
 
         val sentence = firstSymbol.ruleset.joinToString(" ")
 
         return expand(sentence)
     }
 
+    //fun parseText(text: String): String {
+//    val oldText = StringBuilder(text)
+//    val newText = StringBuilder()
+//
+//    var firstTag = oldText.indexOf("{")
+//    FullBreak@ while (firstTag >= 0) {
+//        newText.append(oldText.substring(0, firstTag))
+//        oldText.delete(0, firstTag)
+//        var depth = 1
+//        var position = 0
+//        while (depth > 0) {
+//            position++
+//            if (position > oldText.length - 1) {
+//                break@FullBreak
+//            }
+//            if (oldText[position] == '{' && oldText[position - 1] != '\\') {
+//                depth++
+//            }
+//            if (oldText[position] == '}' && oldText[position - 1] != '\\') {
+//                depth--
+//            }
+//        }
+//        position++
+//        newText.append(parseTag(oldText.substring(0, position)).render())
+//        oldText.delete(0, position)
+//        firstTag = oldText.indexOf("{")
+//    }
+//    newText.append(oldText)
+//    return newText.toString()
+//}
+
     private fun expand(s: String): String {
-        if (!s.hasSymbols())
+        if (!s.contains("{"))
             return s
 
         var result = s
 
-        s.getSymbolKeys().forEach {
+        // TODO: standalone action tags?
 
-            // "it" is of form key.mod.mod where mods are optional
+        while (result.contains("{")) {
 
-            // in case we have modifiers
-            val symbolName = it.substringBefore(".")
+            var symbolTagIndex = result.indexOf('{')
+            var actionTagIndex = 0
 
-            // TODO: symbol not found
-            val newValue = symbols[symbolName]!!.selectRule().text
+            for (i in symbolTagIndex + 1 until result.length) {
 
-            var replacedValue = expand(newValue)
+                if (result[i] == '{') {
+                    symbolTagIndex = i
+                    //continue
+                } else if (result[i] == '[') {
+                    actionTagIndex = i
 
-            if (it.hasModifiers()) {
-                replacedValue = applyModifiers(replacedValue, it.split(".").drop(1))
+                } else if (result[i] == ']') {
+
+                    val action = result.substring(actionTagIndex + 1, i)
+
+                    // do action
+                    val tokens = action.split(":")
+
+                    // assume inside already expanded?
+
+                    runtimeSymbols[tokens[0]] = Symbol(tokens[0], setOf(Rule(tokens[1])))
+
+                    // and clear action from result text
+                    result = result.replaceRange(actionTagIndex, i+1, "")
+                    break
+
+                } else if (result[i] == '}') {
+                    val key = result.substring(symbolTagIndex + 1, i)
+
+                    // "it" is of form key.mod.mod where mods are optional
+                    // in case we have modifiers
+                    val symbolName = key.substringBefore(".")
+
+                    val newValue = getSymbol(symbolName).selectRule().text
+
+                    var replacedValue = expand(newValue)
+
+                    if (key.hasModifiers()) {
+                        replacedValue = applyModifiers(replacedValue, key.split(".").drop(1))
+                    }
+
+                    result = result.replaceRange(symbolTagIndex, i+1, replacedValue)
+                    break
+                }
             }
-
-            result = result.replaceFirst("#$it#", replacedValue)
         }
 
         return result
+    }
+
+    private fun getSymbol(name: String): Symbol {
+        return symbols[name] ?: runtimeSymbols[name] ?: throw IllegalArgumentException("Symbol key \"$name\" not found!")
     }
 
     /**

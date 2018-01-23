@@ -24,7 +24,7 @@ class TraceryTest {
         val json = readJSON("simple1.json")
 
         val grammar = Tracery.createGrammar(json)
-        val expandedText = grammar.flatten("#animal#")
+        val expandedText = grammar.flatten("animal")
 
         assertThat(expandedText, `is`("unicorn raven"))
     }
@@ -35,7 +35,7 @@ class TraceryTest {
         val json = readJSON("simple2.json")
 
         val grammar = Tracery.createGrammar(json)
-        val expandedText = grammar.flatten("#randomAnimal#")
+        val expandedText = grammar.flatten("randomAnimal")
 
         assertThat(expandedText, either(`is`("unicorn")).or(`is`("raven")))
     }
@@ -48,12 +48,12 @@ class TraceryTest {
         val json = readJSON("simple3.json")
 
         val grammar = Tracery.createGrammar(json)
-        var expandedText = grammar.flatten("#sentence#")
+        var expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple owl of the river is called Chiaki"))
 
         Tracery.setRandom(Random(1))
-        expandedText = grammar.flatten("#sentence#")
+        expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple owl of the mountain is called Mia"))
     }
@@ -66,7 +66,7 @@ class TraceryTest {
         val json = readJSON("simple4.json")
 
         val grammar = Tracery.createGrammar(json)
-        val expandedText = grammar.flatten("#sentence#")
+        val expandedText = grammar.flatten("sentence")
 
         val tokens = expandedText.split(",")
 
@@ -81,7 +81,7 @@ class TraceryTest {
         val json = readJSON("modifiers.json")
 
         val grammar = Tracery.createGrammar(json)
-        val expandedText = grammar.flatten("#sentence#")
+        val expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("Purple unicorns are always wistful. An owl is often courteous, unless it is an orange one."))
     }
@@ -94,9 +94,35 @@ class TraceryTest {
         val json = readJSON("recursive.json")
 
         val grammar = Tracery.createGrammar(json)
-        val expandedText = grammar.flatten("#sentence#")
+        val expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple unicorn of the mountain is called Darcy"))
+    }
+
+    @Test
+    fun `Nested1`() {
+
+        Tracery.setRandom(Random(15))
+
+        val json = readJSON("nested1.json")
+
+        val grammar = Tracery.createGrammar(json)
+        val expandedText = grammar.flatten("animal")
+
+        assertThat(expandedText, either(`is`("zebra")).or(`is`("horse")))
+    }
+
+    @Test
+    fun `Nested2`() {
+
+        Tracery.setRandom(Random(15))
+
+        val json = readJSON("nested2.json")
+
+        val grammar = Tracery.createGrammar(json)
+        val expandedText = grammar.flatten("animal")
+
+        assertThat(expandedText, either(`is`("zebra")).or(`is`("horse")))
     }
 
     @Test
@@ -107,6 +133,17 @@ class TraceryTest {
         val generated = grammar.toJSON()
 
         assertThat(generated.replace("\n", ""), `is`(json))
+    }
+
+    @Test
+    fun `Actions`() {
+        Tracery.setRandom(Random(5))
+
+        val json = readJSON("action.json")
+        val grammar = Tracery.createGrammar(json)
+        val expansion = grammar.flatten()
+
+        assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never astute, for the raven was always too impassioned."))
     }
 
     private fun readJSON(fileName: String): String {

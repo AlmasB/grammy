@@ -22,3 +22,5 @@ target/
 # logs #
 *.log
 logs/
+
+sandbox
