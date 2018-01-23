@@ -1,0 +1,5 @@
+{
+  "origin": ["There are {num} {animal.s} with {num} different colors, but mainly {color}."],
+  "color": ["orange","blue","white","black","grey","purple","indigo","turquoise"],
+  "animal": ["unicorn","raven","sparrow","scorpion","coyote","eagle","owl","lizard","zebra","duck","kitten"]
+}

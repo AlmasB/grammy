@@ -146,6 +146,17 @@ class TraceryTest {
         assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never astute, for the raven was always too impassioned."))
     }
 
+    @Test
+    fun `Num keyword`() {
+        Tracery.setRandom(Random(5))
+
+        val json = readJSON("num.json")
+        val grammar = Tracery.createGrammar(json)
+        val expansion = grammar.flatten()
+
+        assertThat(expansion, `is`("There are 1568779487 ravens with 189533474 different colors, but mainly grey."))
+    }
+
     private fun readJSON(fileName: String): String {
         return Files.readAllLines(Paths.get(javaClass.getResource(fileName).toURI())).joinToString("")
     }

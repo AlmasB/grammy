@@ -168,7 +168,14 @@ class Grammar() {
                     // in case we have modifiers
                     val symbolName = key.substringBefore(".")
 
-                    val newValue = getSymbol(symbolName).selectRule().text
+                    // TODO: generalize
+
+
+                    val newValue = if (symbolName == "num") {
+                        Tracery.random.nextInt(Int.MAX_VALUE).toString()
+                    } else {
+                        getSymbol(symbolName).selectRule().text
+                    }
 
                     var replacedValue = expand(newValue)
 
