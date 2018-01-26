@@ -63,7 +63,16 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
     /**
      * Selects a random single rule from the ruleset.
      */
-    fun selectRule(): Rule {
+    fun selectRule(regex: String): Rule {
+        // TODO: when using regex also take into account distributions?
+
+        if (regex.isNotEmpty()) {
+            val valid = distributions.values.plus(withoutDistr).filter { it.text.matches(regex.toRegex()) }
+
+            return valid[Tracery.random.nextInt(valid.size)]
+        }
+
+
         if (distributions.isNotEmpty()) {
             val randomValue = Tracery.random.nextInt(100)
 
@@ -198,9 +207,14 @@ class Grammar() {
                 } else if (result[i] == '}') {
                     val key = result.substring(symbolTagIndex + 1, i)
 
-                    // "it" is of form key.mod.mod where mods are optional
-                    // in case we have modifiers
-                    val symbolName = key.substringBefore(".")
+                    // "it" is of form key#regex#.mod.mod where mods are optional
+
+                    val symbolName = if (key.contains("#")) {
+                        key.substringBefore("#")
+                    } else {
+                        // in case we have modifiers
+                        key.substringBefore(".")
+                    }
 
                     // TODO: generalize
 
@@ -208,13 +222,16 @@ class Grammar() {
                     val newValue = if (symbolName == "num") {
                         Tracery.random.nextInt(Int.MAX_VALUE).toString()
                     } else {
-                        getSymbol(symbolName).selectRule().text
+                        val regex = if (key.contains("#")) key.substringAfter("#").substringBefore("#") else ""
+
+                        getSymbol(symbolName).selectRule(regex).text
                     }
 
                     var replacedValue = expand(newValue)
 
                     if (key.hasModifiers()) {
-                        replacedValue = applyModifiers(replacedValue, key.split(".").drop(1))
+                        // clean from regex then apply mods
+                        replacedValue = applyModifiers(replacedValue, key.substringAfterLast("#").split(".").drop(1))
                     }
 
                     result = result.replaceRange(symbolTagIndex, i+1, replacedValue)

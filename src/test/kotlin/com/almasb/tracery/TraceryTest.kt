@@ -146,18 +146,18 @@ class TraceryTest {
         assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never astute, for the raven was always too impassioned."))
     }
 
-//    @Test
-//    fun `Regex selection`() {
-//        for (i in 1..15) {
-//            Tracery.setRandom(Random(i.toLong()))
-//
-//            val json = readJSON("regex.json")
-//            val grammar = Tracery.createGrammar(json)
-//            val expansion = grammar.flatten("randomAnimal")
-//
-//            assertThat(expansion, either(`is`("cow")).or(`is`("sparrow")))
-//        }
-//    }
+    @Test
+    fun `Regex selection`() {
+        for (i in 1..15) {
+            Tracery.setRandom(Random(i.toLong()))
+
+            val json = readJSON("regex.json")
+            val grammar = Tracery.createGrammar(json)
+            val expansion = grammar.flatten("randomAnimal")
+
+            assertThat(expansion, either(`is`("cow")).or(`is`("sparrow")))
+        }
+    }
 
     @Test
     fun `Num keyword`() {
