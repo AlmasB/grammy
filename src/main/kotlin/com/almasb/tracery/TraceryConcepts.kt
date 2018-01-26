@@ -36,11 +36,45 @@ class Rule(val text: String) {
  */
 class Symbol(val key: String, val ruleset: Set<Rule>) {
 
+    private val distributions = hashMapOf<IntRange, Rule>()
+    private val withoutDistr: Set<Rule>
+
+    init {
+        val withDistributions = ruleset.filter { it.text.endsWith(")") }
+        withoutDistr = ruleset.minus(withDistributions)
+
+        var bound = 0
+
+        withDistributions.forEach {
+            val dist = it.text.substringAfter("(").substringBefore(")").toInt()
+
+            val range = bound until bound+dist
+
+            distributions[range] = Rule(it.text.removeSuffix("($dist)"))
+
+            bound += dist
+        }
+
+        if (bound > 100) {
+            throw IllegalStateException("Distributions for $key don't add up to 100%")
+        }
+    }
+
     /**
      * Selects a random single rule from the ruleset.
      */
     fun selectRule(): Rule {
-        return ruleset.elementAt(Tracery.random.nextInt(ruleset.size))
+        if (distributions.isNotEmpty()) {
+            val randomValue = Tracery.random.nextInt(100)
+
+            for ((distr, rule) in distributions) {
+                if (randomValue in distr) {
+                    return rule
+                }
+            }
+        }
+
+        return withoutDistr.elementAt(Tracery.random.nextInt(withoutDistr.size))
     }
 }
 

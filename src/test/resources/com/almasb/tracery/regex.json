@@ -1,0 +1,4 @@
+{
+  "randomAnimal": ["{animal,.*w$}"],
+  "animal": ["unicorn","raven","sparrow","scorpion","coyote","eagle","owl","lizard","zebra","duck","kitten", "cow"]
+}
