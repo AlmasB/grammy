@@ -160,6 +160,19 @@ class TraceryTest {
     }
 
     @Test
+    fun `Regex selection 2`() {
+        for (i in 1..15) {
+            Tracery.setRandom(Random(i.toLong()))
+
+            val json = readJSON("regex2.json")
+            val grammar = Tracery.createGrammar(json)
+            val expansion = grammar.flatten("randomAnimal")
+
+            assertThat(expansion, either(`is`("cow")).or(`is`("duck")))
+        }
+    }
+
+    @Test
     fun `Num keyword`() {
         Tracery.setRandom(Random(5))
 

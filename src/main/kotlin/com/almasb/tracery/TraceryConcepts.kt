@@ -69,6 +69,10 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
         if (regex.isNotEmpty()) {
             val valid = distributions.values.plus(withoutDistr).filter { it.text.matches(regex.toRegex()) }
 
+            if (valid.isEmpty()) {
+                throw IllegalStateException("No matching rule found!")
+            }
+
             return valid[Tracery.random.nextInt(valid.size)]
         }
 
@@ -181,11 +185,18 @@ class Grammar() {
             var symbolTagIndex = result.indexOf('{')
             var actionTagIndex = 0
 
+            var hitRegex = false
+
             for (i in symbolTagIndex + 1 until result.length) {
 
                 if (result[i] == '{') {
+
+                    // only if not within regex
+                    if (hitRegex)
+                        continue
+
                     symbolTagIndex = i
-                    //continue
+
                 } else if (result[i] == '[') {
                     actionTagIndex = i
 
@@ -204,7 +215,18 @@ class Grammar() {
                     result = result.replaceRange(actionTagIndex, i+1, "")
                     break
 
+                } else if (result[i] == '#') {
+
+                    hitRegex = !hitRegex
+
                 } else if (result[i] == '}') {
+
+                    // only if not within regex
+                    if (hitRegex)
+                        continue
+
+
+
                     val key = result.substring(symbolTagIndex + 1, i)
 
                     // "it" is of form key#regex#.mod.mod where mods are optional
