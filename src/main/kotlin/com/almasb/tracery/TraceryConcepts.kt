@@ -198,9 +198,16 @@ class Grammar() {
                     symbolTagIndex = i
 
                 } else if (result[i] == '[') {
+
+                    if (hitRegex)
+                        continue
+
                     actionTagIndex = i
 
                 } else if (result[i] == ']') {
+
+                    if (hitRegex)
+                        continue
 
                     val action = result.substring(actionTagIndex + 1, i)
 

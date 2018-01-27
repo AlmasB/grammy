@@ -1,0 +1,4 @@
+{
+  "randomAnimal": ["{animal#[ce].{4,}#}"],
+  "animal": ["unicorn","raven","sparrow","scorpion","coyote","eagle","lizard","zebra","duck","kitten", "cow"]
+}
