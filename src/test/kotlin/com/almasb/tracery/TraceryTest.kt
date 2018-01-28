@@ -1,12 +1,11 @@
 package com.almasb.tracery
 
-import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.Matchers
 import org.hamcrest.Matchers.*
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.ValueSource
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
@@ -19,10 +18,10 @@ import java.util.*
 class TraceryTest {
 
     // TODO: extract common code from tests
+    // TODO: use @BeforeEach to set up tracery random
 
     @Test
     fun `Basic syntax 1`() {
-
         val json = readJSON("simple1.json")
 
         val grammar = Tracery.createGrammar(json)
@@ -33,7 +32,6 @@ class TraceryTest {
 
     @Test
     fun `Basic syntax 2`() {
-
         val json = readJSON("simple2.json")
 
         val grammar = Tracery.createGrammar(json)
@@ -44,7 +42,6 @@ class TraceryTest {
 
     @Test
     fun `Basic syntax 3`() {
-
         Tracery.setRandom(Random(0))
 
         val json = readJSON("simple3.json")
@@ -62,7 +59,6 @@ class TraceryTest {
 
     @Test
     fun `The same symbol expands to random text`() {
-
         Tracery.setRandom(Random(0))
 
         val json = readJSON("simple4.json")
@@ -77,7 +73,6 @@ class TraceryTest {
 
     @Test
     fun `Modifiers`() {
-
         Tracery.setRandom(Random(15))
 
         val json = readJSON("modifiers.json")
@@ -90,7 +85,6 @@ class TraceryTest {
 
     @Test
     fun `Recursive`() {
-
         Tracery.setRandom(Random(15))
 
         val json = readJSON("recursive.json")
@@ -101,25 +95,13 @@ class TraceryTest {
         assertThat(expandedText, `is`("The purple unicorn of the mountain is called Darcy"))
     }
 
-    @Test
-    fun `Nested1`() {
+    @ParameterizedTest
+    @ValueSource(strings = arrayOf("nested1.json", "nested2.json"))
+    fun `Nested`(jsonFile: String) {
 
         Tracery.setRandom(Random(15))
 
-        val json = readJSON("nested1.json")
-
-        val grammar = Tracery.createGrammar(json)
-        val expandedText = grammar.flatten("animal")
-
-        assertThat(expandedText, either(`is`("zebra")).or(`is`("horse")))
-    }
-
-    @Test
-    fun `Nested2`() {
-
-        Tracery.setRandom(Random(15))
-
-        val json = readJSON("nested2.json")
+        val json = readJSON(jsonFile)
 
         val grammar = Tracery.createGrammar(json)
         val expandedText = grammar.flatten("animal")
