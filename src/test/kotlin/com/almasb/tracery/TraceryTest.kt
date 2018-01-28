@@ -4,6 +4,8 @@ import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers
 import org.hamcrest.Matchers.*
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -223,6 +225,44 @@ class TraceryTest {
         assertThat(grammar.flatten(), `is`("Morgana was a great baker, and this song tells of her adventure. Morgana folded dough, then she iced a cake, then she went home to read a book."))
         assertThat(grammar.flatten(), `is`("Urga was a great baker, and this song tells of his adventure. Urga folded dough, then he folded dough, then he went home to read a book."))
         assertThat(grammar.flatten(), `is`("Cheri was a great warrior, and this song tells of their adventure. Cheri defeated a sphinx, then they defeated a sphinx, then they went home to read a book."))
+    }
+
+    // FORMAL DEFINITION TESTS
+
+    @Test
+    fun `A rule cannot be empty`() {
+        val grammar = Tracery.createGrammar()
+
+        assertThrows(TracerySyntaxException::class.java, {
+            grammar.addSymbol("key", setOf(""))
+        })
+    }
+
+    @Test
+    fun `A symbol key cannot be empty`() {
+        val grammar = Tracery.createGrammar()
+
+        assertThrows(TracerySyntaxException::class.java, {
+            grammar.addSymbol("", setOf("rule1", "rule2"))
+        })
+    }
+
+    @Test
+    fun `A symbol ruleset cannot be empty`() {
+        val grammar = Tracery.createGrammar()
+
+        assertThrows(TracerySyntaxException::class.java, {
+            grammar.addSymbol("key", setOf())
+        })
+    }
+
+    @Test
+    fun `A symbol total rule distribution value does not exceed 100`() {
+        val grammar = Tracery.createGrammar()
+
+        assertThrows(TracerySyntaxException::class.java, {
+            grammar.addSymbol("key", setOf("rule1(50)", "rule2(51)"))
+        })
     }
 
     private fun readJSON(fileName: String): String {

@@ -21,23 +21,34 @@ private val REGEX_DELIMITER = '#'
 private val MODIFIER_OPERATOR = '.'
 
 /**
- * Currently just a text wrapper, but can be made more powerful in the future, e.g. with states.
- * TODO: if this is the only purpose, then typealias this to String?
+ * A rule is a non-empty string.
  *
  * Examples: "some text", "{name}", "The color is {color}."
  */
 class Rule(val text: String) {
 
+    init {
+        if (text.isEmpty())
+            fail("Rule cannot be empty")
+    }
+
     override fun toString(): String = text
 }
 
 /**
- * A symbol is a **key** (usually a short human-readable string) and a set of expansion rules.
+ * A symbol is a **key** (a non-empty string) and a non-empty set of expansion rules.
  *
  * Each top-level key-value pair in the raw JSON object creates a **symbol**.
- * The symbol's **key** is set from the key, and the value determines the **ruleset**.
+ * The pair key becomes the symbol's **key**, and the pair value determines the **ruleset**.
  *
  * Placing a **key** between '{' and '}', in a Tracery syntax object, will create a expansion node for that symbol within the text.
+ * Example: "The color is {color}."
+ *
+ * Each rule can have a distribution percentage value in range [0..100] associated with it.
+ * The sum of all distribution values per symbol cannot exceed 100.
+ * Examples: "dog(30)", "cat(15)", "mouse", "pig".
+ * Dog and cat will have respectively 30% and 15% chance of being selected, whereas mouse and pig
+ * will share the remaining 55% and if the 55% is selected, randomly one of them will be chosen.
  */
 class Symbol(val key: String, val ruleset: Set<Rule>) {
 
@@ -45,6 +56,12 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
     private val withoutDistr: Set<Rule>
 
     init {
+        if (key.isEmpty())
+            fail("Symbol key cannot be empty")
+
+        if (ruleset.isEmpty())
+            fail("Ruleset cannot be empty")
+
         val withDistributions = ruleset.filter { it.text.endsWith(")") }
         withoutDistr = ruleset.minus(withDistributions)
 
@@ -61,7 +78,7 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
         }
 
         if (bound > 100) {
-            throw IllegalStateException("Rule distributions for $key are greater than 100%")
+            fail("Rule distributions for $key are greater than 100%")
         }
     }
 
@@ -98,6 +115,7 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
 
 /**
  * A modifier is a function that takes a string (and optionally parameters) and returns a string.
+ * A modifier can only be applied to a symbol key.
  *
  * Modifiers are applied, in order, after a tag is fully expanded.
  *
@@ -131,8 +149,8 @@ class Grammar {
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
     private val runtimeSymbols: HashMap<String, Symbol> = linkedMapOf()
 
-    fun addSymbol(symbol: Symbol) {
-        symbols[symbol.key] = symbol
+    fun addSymbol(symbolKey: String, ruleset: Set<String>) {
+        symbols[symbolKey] = Symbol(symbolKey, ruleset.map { Rule(it) }.toSet())
     }
 
     fun flatten() = flatten("origin")
@@ -342,6 +360,12 @@ class Grammar {
 
         return sb.toString()
     }
+}
+
+class TracerySyntaxException(message: String) : Exception(message)
+
+private fun fail(message: String) {
+    throw TracerySyntaxException(message)
 }
 
 private fun String.hasModifiers(): Boolean = this.contains(MODIFIER_OPERATOR)

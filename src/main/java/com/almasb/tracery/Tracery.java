@@ -19,10 +19,17 @@ public final class Tracery {
     }
 
     /**
+     * Create empty grammar.
+     */
+    public static Grammar createGrammar() {
+        return new Grammar();
+    }
+
+    /**
      * Create grammar from a JSON string in Tracery format.
      */
     public static Grammar createGrammar(String json) {
-        Grammar grammar = new Grammar();
+        Grammar grammar = createGrammar();
         grammar.fromJSON(json);
         return grammar;
     }
