@@ -11,26 +11,18 @@ val ENG_MODIFIERS = load()
 
 private fun load(): List<Modifier> {
 
-    // TODO: tighter defn for modifiers, e.g. text (s) cannot be empty
+    // modifiers are applied after the tag is fully expanded
+    // the expanded text, s, is guaranteed to be non-empty
 
     add("capitalize", { s, args ->
-        if (s.isEmpty())
-            return@add s
-
         s.first().toUpperCase() + s.drop(1)
     })
 
     add("capitalizeAll", { s, args ->
-        if (s.isEmpty())
-            return@add s
-
         s.toUpperCase()
     })
 
     add("s", { s, args ->
-        if (s.isEmpty())
-            return@add s
-
         when (s.last()) {
             in "shx" -> return@add s + "es"
             'y' -> {
@@ -44,9 +36,6 @@ private fun load(): List<Modifier> {
     })
 
     add("ed", { s, args ->
-        if (s.isEmpty())
-            return@add s
-
         return@add when (s.last()) {
             'e' -> s + "d"
             'y' -> {
@@ -61,14 +50,12 @@ private fun load(): List<Modifier> {
     })
 
     add("a", { s, args ->
-        if (s.isNotEmpty()) {
-            if (s[0] in "uU" && s.length > 2 && s[2] in "iI") {
-                return@add "a " + s
-            }
+//        if (s[0] in "uU" && s.length > 2 && s[2] in "iI") {
+//            return@add "a " + s
+//        }
 
-            if (s[0].isVowel()) {
-                return@add "an " + s
-            }
+        if (s[0].isVowel()) {
+            return@add "an " + s
         }
 
         "a " + s

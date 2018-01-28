@@ -265,6 +265,15 @@ class TraceryTest {
         })
     }
 
+    @Test
+    fun `Fail if grammar has no starting symbol`() {
+        val grammar = Tracery.createGrammar()
+
+        assertThrows(TraceryParseException::class.java, {
+            grammar.flatten()
+        })
+    }
+
     private fun readJSON(fileName: String): String {
         return Files.readAllLines(Paths.get(javaClass.getResource(fileName).toURI())).joinToString("")
     }

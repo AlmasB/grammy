@@ -1,5 +1,6 @@
 package com.almasb.tracery
 
+import com.almasb.tracery.Tracery.random
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.HashMap
 
@@ -96,11 +97,11 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
                 throw IllegalStateException("No matching rule found!")
             }
 
-            return valid[Tracery.random.nextInt(valid.size)]
+            return valid[random.nextInt(valid.size)]
         }
 
         if (distributions.isNotEmpty()) {
-            val randomValue = Tracery.random.nextInt(100)
+            val randomValue = random.nextInt(100)
 
             for ((distr, rule) in distributions) {
                 if (randomValue in distr) {
@@ -109,7 +110,7 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
             }
         }
 
-        return withoutDistr.elementAt(Tracery.random.nextInt(withoutDistr.size))
+        return withoutDistr.elementAt(random.nextInt(withoutDistr.size))
     }
 }
 
@@ -156,12 +157,11 @@ class Grammar {
     fun flatten() = flatten("origin")
 
     fun flatten(startSymbolKey: String): String {
+        val firstSymbol = symbols[startSymbolKey] ?: throw parseError("Symbol key not found: $startSymbolKey")
 
-        val firstSymbol = symbols[startSymbolKey] ?: throw IllegalArgumentException("Symbol key \"$startSymbolKey\" not found!")
+        val story = firstSymbol.ruleset.joinToString(" ")
 
-        val sentence = firstSymbol.ruleset.joinToString(" ")
-
-        return expand(sentence)
+        return expand(story)
     }
 
     //fun parseText(text: String): String {
@@ -281,7 +281,7 @@ class Grammar {
 
 
                     val newValue = if (symbolName == "num") {
-                        Tracery.random.nextInt(Int.MAX_VALUE).toString()
+                        random.nextInt(Int.MAX_VALUE).toString()
                     } else {
                         val regex = if (key.contains("#")) key.substringAfter("#").substringBefore("#") else ""
 
@@ -305,7 +305,7 @@ class Grammar {
     }
 
     private fun getSymbol(name: String): Symbol {
-        return symbols[name] ?: runtimeSymbols[name] ?: throw IllegalArgumentException("Symbol key \"$name\" not found!")
+        return symbols[name] ?: runtimeSymbols[name] ?: throw parseError("Symbol key \"$name\" not found!")
     }
 
     /**
@@ -362,10 +362,13 @@ class Grammar {
     }
 }
 
-class TracerySyntaxException(message: String) : Exception(message)
+class TracerySyntaxException(message: String) : RuntimeException(message)
+class TraceryParseException(message: String) : RuntimeException(message)
 
 private fun fail(message: String) {
     throw TracerySyntaxException(message)
 }
+
+private fun parseError(message: String) = TraceryParseException(message)
 
 private fun String.hasModifiers(): Boolean = this.contains(MODIFIER_OPERATOR)
