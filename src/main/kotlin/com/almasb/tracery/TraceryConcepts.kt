@@ -16,6 +16,10 @@ import java.util.HashMap
 // These are reserved Tracery characters
 private val SYMBOL_START = '{'
 private val SYMBOL_END = '}'
+private val ACTION_START = '['
+private val ACTION_END = ']'
+private val ACTION_OPERATOR = ':'
+private val MULTIPLE_ACTION_DELIMITER = ','
 private val DISTRIBUTION_START = '('
 private val DISTRIBUTION_END = ')'
 private val REGEX_DELIMITER = '#'
@@ -164,139 +168,91 @@ class Grammar {
         return expand(story)
     }
 
-    //fun parseText(text: String): String {
-//    val oldText = StringBuilder(text)
-//    val newText = StringBuilder()
-//
-//    var firstTag = oldText.indexOf("{")
-//    FullBreak@ while (firstTag >= 0) {
-//        newText.append(oldText.substring(0, firstTag))
-//        oldText.delete(0, firstTag)
-//        var depth = 1
-//        var position = 0
-//        while (depth > 0) {
-//            position++
-//            if (position > oldText.length - 1) {
-//                break@FullBreak
-//            }
-//            if (oldText[position] == '{' && oldText[position - 1] != '\\') {
-//                depth++
-//            }
-//            if (oldText[position] == '}' && oldText[position - 1] != '\\') {
-//                depth--
-//            }
-//        }
-//        position++
-//        newText.append(parseTag(oldText.substring(0, position)).render())
-//        oldText.delete(0, position)
-//        firstTag = oldText.indexOf("{")
-//    }
-//    newText.append(oldText)
-//    return newText.toString()
-//}
-
     private fun expand(s: String): String {
-        if (!s.contains("{"))
+        if (!s.hasSymbols())
             return s
 
         var result = s
 
-        // TODO: standalone action tags?
+        while (result.hasSymbols()) {
 
-        while (result.contains("{")) {
-
-            var symbolTagIndex = result.indexOf('{')
+            var symbolTagIndex = result.indexOf(SYMBOL_START)
             var actionTagIndex = 0
 
-            var hitRegex = false
+            var insideRegex = false
 
-            for (i in symbolTagIndex + 1 until result.length) {
+            charLoop@
+            for (index in symbolTagIndex + 1 until result.length) {
 
-                if (result[i] == '{') {
+                val currentChar = result[index]
 
-                    // only if not within regex
-                    if (hitRegex)
-                        continue
+                if (currentChar == REGEX_DELIMITER) {
+                    insideRegex = !insideRegex
+                    continue
+                }
 
-                    symbolTagIndex = i
+                if (insideRegex)
+                    continue
 
-                } else if (result[i] == '[') {
-
-                    if (hitRegex)
-                        continue
-
-                    actionTagIndex = i
-
-                } else if (result[i] == ']') {
-
-                    if (hitRegex)
-                        continue
-
-                    val action = result.substring(actionTagIndex + 1, i)
-
-                    if (action.isNotEmpty()) {
-
-                        //println(action)
-
-                        // do action
-                        val tokens = action.split(":")
-
-                        // action is of form key:rule1,rule2
-
-                        // assume inside already expanded?
-
-                        //println(tokens)
-
-                        runtimeSymbols[tokens[0]] = Symbol(tokens[0], tokens[1].split(",").map { Rule(it) }.toSet())
+                when (currentChar) {
+                    SYMBOL_START -> {
+                        symbolTagIndex = index
                     }
 
-                    // and clear action from result text
-                    result = result.replaceRange(actionTagIndex, i+1, "")
-                    break
-
-                } else if (result[i] == '#') {
-
-                    hitRegex = !hitRegex
-
-                } else if (result[i] == '}') {
-
-                    // only if not within regex
-                    if (hitRegex)
-                        continue
-
-
-
-                    val key = result.substring(symbolTagIndex + 1, i)
-
-                    // "it" is of form key#regex#.mod.mod where mods are optional
-
-                    val symbolName = if (key.contains("#")) {
-                        key.substringBefore("#")
-                    } else {
-                        // in case we have modifiers
-                        key.substringBefore(".")
+                    ACTION_START -> {
+                        actionTagIndex = index
                     }
 
-                    // TODO: generalize
+                    // TODO: extract into functions
+                    SYMBOL_END -> {
+                        val key = result.substring(symbolTagIndex + 1, index)
+
+                        // key has maximal form: key#regex#.mod.mod
+                        // so if we have regex or modifier, if we don't have either, then the original string is returned
+                        val symbolName = key.substringBefore( if (key.hasRegex()) REGEX_DELIMITER else MODIFIER_OPERATOR )
 
 
-                    val newValue = if (symbolName == "num") {
-                        random.nextInt(Int.MAX_VALUE).toString()
-                    } else {
-                        val regex = if (key.contains("#")) key.substringAfter("#").substringBefore("#") else ""
 
-                        getSymbol(symbolName).selectRule(regex).text
+
+
+                        // TODO: generalize
+                        val newValue = if (symbolName == "num") {
+                            random.nextInt(Int.MAX_VALUE).toString()
+                        } else {
+                            val regex = if (key.hasRegex()) key.substringBetween(REGEX_DELIMITER) else ""
+
+                            getSymbol(symbolName).selectRule(regex).text
+                        }
+
+                        var expandedText = expand(newValue)
+
+                        if (key.hasModifiers()) {
+                            // clean from regex then apply mods
+                            expandedText = applyModifiers(expandedText, key.substringAfterLast(REGEX_DELIMITER).split(MODIFIER_OPERATOR).drop(1))
+                        }
+
+                        // update result
+                        result = result.replaceRange(symbolTagIndex, index+1, expandedText)
+                        break@charLoop
                     }
 
-                    var replacedValue = expand(newValue)
+                    ACTION_END -> {
+                        val action = result.substring(actionTagIndex + 1, index)
 
-                    if (key.hasModifiers()) {
-                        // clean from regex then apply mods
-                        replacedValue = applyModifiers(replacedValue, key.substringAfterLast("#").split(".").drop(1))
+                        if (action.isNotEmpty()) {
+                            val tokens = action.split(ACTION_OPERATOR)
+
+                            // action is of form key:rule1,rule2,rule3
+                            // so tokens[0] is key
+                            // and tokens[1] is rule1,rule2,rule3
+
+                            runtimeSymbols[tokens[0]] = Symbol(tokens[0], tokens[1].split(MULTIPLE_ACTION_DELIMITER).map { Rule(it) }.toSet())
+                        }
+
+                        // and clear action from result text
+                        result = result.replaceRange(actionTagIndex, index+1, "")
+                        break@charLoop
                     }
-
-                    result = result.replaceRange(symbolTagIndex, i+1, replacedValue)
-                    break
                 }
             }
         }
@@ -334,11 +290,12 @@ class Grammar {
      */
     fun fromJSON(json: String) {
         symbols.clear()
+        runtimeSymbols.clear()
 
-        val node = jacksonObjectMapper().readTree(json)
+        val rootObject = jacksonObjectMapper().readTree(json)
 
-        node.fields().forEach {
-            symbols.put(it.key, Symbol(it.key, it.value.asSequence().map { Rule(it.asText()) }.toSet()))
+        rootObject.fields().forEach {
+            addSymbol(it.key, it.value.asSequence().map { it.asText() }.toSet())
         }
     }
 
@@ -371,4 +328,9 @@ private fun fail(message: String) {
 
 private fun parseError(message: String) = TraceryParseException(message)
 
+private fun String.hasSymbols(): Boolean = this.contains(SYMBOL_START)
+private fun String.hasRegex(): Boolean = this.contains(REGEX_DELIMITER)
 private fun String.hasModifiers(): Boolean = this.contains(MODIFIER_OPERATOR)
+
+private fun String.substringBetween(delimiter: Char): String = this.substringAfter(delimiter).substringBefore(delimiter)
+
