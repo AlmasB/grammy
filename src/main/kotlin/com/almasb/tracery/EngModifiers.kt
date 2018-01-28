@@ -20,6 +20,13 @@ private fun load(): List<Modifier> {
         s.first().toUpperCase() + s.drop(1)
     })
 
+    add("capitalizeAll", { s, args ->
+        if (s.isEmpty())
+            return@add s
+
+        s.toUpperCase()
+    })
+
     add("s", { s, args ->
         if (s.isEmpty())
             return@add s
@@ -41,7 +48,6 @@ private fun load(): List<Modifier> {
             return@add s
 
         return@add when (s.last()) {
-            //in "shx" -> s + "ed"
             'e' -> s + "d"
             'y' -> {
                 if (!s.dropLast(1).last().isVowel()) {
