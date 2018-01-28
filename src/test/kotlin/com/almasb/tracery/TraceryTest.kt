@@ -209,6 +209,22 @@ class TraceryTest {
         }
     }
 
+    @Test
+    fun `Story`() {
+        Tracery.setRandom(Random(99))
+
+        val json = readJSON("story.json")
+        val grammar = Tracery.createGrammar(json)
+        val expansion = grammar.flatten()
+
+        assertThat(expansion, `is`("Krox was a great baker, and this song tells of her adventure. Krox baked bread, then she made croissants, then she went home to read a book."))
+
+        assertThat(grammar.flatten(), `is`("Brick was a great warrior, and this song tells of his adventure. Brick fought a golem, then he defeated a giant, then he went home to read a book."))
+        assertThat(grammar.flatten(), `is`("Morgana was a great baker, and this song tells of her adventure. Morgana folded dough, then she iced a cake, then she went home to read a book."))
+        assertThat(grammar.flatten(), `is`("Urga was a great baker, and this song tells of his adventure. Urga folded dough, then he folded dough, then he went home to read a book."))
+        assertThat(grammar.flatten(), `is`("Cheri was a great warrior, and this song tells of their adventure. Cheri defeated a sphinx, then they defeated a sphinx, then they went home to read a book."))
+    }
+
     private fun readJSON(fileName: String): String {
         return Files.readAllLines(Paths.get(javaClass.getResource(fileName).toURI())).joinToString("")
     }

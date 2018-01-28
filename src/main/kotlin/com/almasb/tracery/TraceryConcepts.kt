@@ -1,25 +1,30 @@
 package com.almasb.tracery
 
-import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.HashMap
-import java.util.regex.Pattern
 
 /*
  * The original specification of Tracery by Kate Compton can be found at https://github.com/galaxykate/tracery/tree/tracery2
  *
- * This implementation only loosely follows the original specification and given the same data may not produce the same output.
+ * This implementation introduces new concepts and more functionality via new syntax.
+ * The syntax used here is incompatible with the original.
  *
  * @author Almas Baimagambetov (almaslvl@gmail.com)
  */
 
-private val SYMBOL_OPERATOR = "#"
-private val MODIFIER_OPERATOR = "."
+// These are reserved Tracery characters
+private val SYMBOL_START = '{'
+private val SYMBOL_END = '}'
+private val DISTRIBUTION_START = '('
+private val DISTRIBUTION_END = ')'
+private val REGEX_DELIMITER = '#'
+private val MODIFIER_OPERATOR = '.'
 
 /**
  * Currently just a text wrapper, but can be made more powerful in the future, e.g. with states.
+ * TODO: if this is the only purpose, then typealias this to String?
  *
- * Examples: "some text", "#name#", "The color is #color#."
+ * Examples: "some text", "{name}", "The color is {color}."
  */
 class Rule(val text: String) {
 
@@ -32,7 +37,7 @@ class Rule(val text: String) {
  * Each top-level key-value pair in the raw JSON object creates a **symbol**.
  * The symbol's **key** is set from the key, and the value determines the **ruleset**.
  *
- * Putting a **key** in hashtags, in a Tracery syntax object, will create a expansion node for that symbol within the text.
+ * Placing a **key** between '{' and '}', in a Tracery syntax object, will create a expansion node for that symbol within the text.
  */
 class Symbol(val key: String, val ruleset: Set<Rule>) {
 
@@ -46,7 +51,7 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
         var bound = 0
 
         withDistributions.forEach {
-            val dist = it.text.substringAfter("(").substringBefore(")").toInt()
+            val dist = it.text.substringAfter(DISTRIBUTION_START).substringBefore(DISTRIBUTION_END).toInt()
 
             val range = bound until bound+dist
 
@@ -56,12 +61,13 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
         }
 
         if (bound > 100) {
-            throw IllegalStateException("Distributions for $key don't add up to 100%")
+            throw IllegalStateException("Rule distributions for $key are greater than 100%")
         }
     }
 
     /**
      * Selects a random single rule from the ruleset.
+     * If a rule has a distribution associated with it, the distribution will be honored.
      */
     fun selectRule(regex: String): Rule {
         // TODO: when using regex also take into account distributions?
@@ -75,7 +81,6 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
 
             return valid[Tracery.random.nextInt(valid.size)]
         }
-
 
         if (distributions.isNotEmpty()) {
             val randomValue = Tracery.random.nextInt(100)
@@ -97,9 +102,9 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
  * Modifiers are applied, in order, after a tag is fully expanded.
  *
  * To apply a modifier, add its name after a period, after the tag's main symbol:
- * #animal.capitalize#
- * #booktitle.capitalizeAll#
- * Hundreds of #animal.s#
+ * {animal.capitalize}
+ * {booktitle.capitalizeAll}
+ * Hundreds of {animal.s}
  */
 abstract class Modifier(val name: String) {
 
@@ -121,7 +126,7 @@ class Action() {
 /**
  * A Grammar is a dictionary of **symbols**.
  */
-class Grammar() {
+class Grammar {
 
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
     private val runtimeSymbols: HashMap<String, Symbol> = linkedMapOf()
@@ -211,12 +216,21 @@ class Grammar() {
 
                     val action = result.substring(actionTagIndex + 1, i)
 
-                    // do action
-                    val tokens = action.split(":")
+                    if (action.isNotEmpty()) {
 
-                    // assume inside already expanded?
+                        //println(action)
 
-                    runtimeSymbols[tokens[0]] = Symbol(tokens[0], setOf(Rule(tokens[1])))
+                        // do action
+                        val tokens = action.split(":")
+
+                        // action is of form key:rule1,rule2
+
+                        // assume inside already expanded?
+
+                        //println(tokens)
+
+                        runtimeSymbols[tokens[0]] = Symbol(tokens[0], tokens[1].split(",").map { Rule(it) }.toSet())
+                    }
 
                     // and clear action from result text
                     result = result.replaceRange(actionTagIndex, i+1, "")
@@ -330,21 +344,4 @@ class Grammar() {
     }
 }
 
-private fun String.hasSymbols(): Boolean = this.contains(SYMBOL_OPERATOR)
 private fun String.hasModifiers(): Boolean = this.contains(MODIFIER_OPERATOR)
-
-private val symbolKeyPattern = Pattern.compile(Pattern.quote("#") + "(.*?)" + Pattern.quote("#"))
-
-private fun String.getSymbolKeys(): List<String> {
-    val m = symbolKeyPattern.matcher(this)
-
-    val result = arrayListOf<String>()
-
-    while (m.find()) {
-        // given #key#, match == key
-        val match = m.group(1)
-        result.add(match)
-    }
-
-    return result
-}
