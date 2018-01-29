@@ -49,6 +49,12 @@ class Rule(val text: String) {
  * Placing a **key** between '{' and '}', in a Tracery syntax object, will create a expansion node for that symbol within the text.
  * Example: "The color is {color}."
  *
+ * An action can be used to generate runtime symbols.
+ * An action is placed between '[' and ']' and before the symbol key.
+ * Example: {[hero:Stephen,John]key} or more complex {[hero:{name}]key}.
+ * This syntax will generate a symbol with key "hero" and ruleset "Stephen", "John".
+ * If the symbol does not exist, the action creates it.
+ *
  * Each rule can have a distribution percentage value in range [0..100] associated with it.
  * The sum of all distribution values per symbol cannot exceed 100.
  * Examples: "dog(30)", "cat(15)", "mouse", "pig".
@@ -135,18 +141,6 @@ abstract class Modifier(val name: String) {
 }
 
 /**
- * TODO: action
- * An action that occurs when its node is expanded.
- *
- * Built-in actions are:
- * Generating some rules "[key:#rule#]" and pushing them to the "key" symbol's rule stack.
- * If that symbol does not exist, it creates it.
- */
-class Action() {
-
-}
-
-/**
  * A Grammar is a dictionary of **symbols**.
  */
 class Grammar {
@@ -168,109 +162,122 @@ class Grammar {
         return expand(story)
     }
 
+    /**
+     * Fully expand given string, i.e. the returned value will not have symbols.
+     */
     private fun expand(s: String): String {
         if (!s.hasSymbols())
             return s
 
         var result = s
 
+        // TODO: or actions?
         while (result.hasSymbols()) {
+            result = expandSymbolOrAction(result)
+        }
 
-            var symbolTagIndex = result.indexOf(SYMBOL_START)
-            var actionTagIndex = 0
+        return result
+    }
 
-            var insideRegex = false
+    private fun expandSymbolOrAction(s: String): String {
+        var symbolTagIndex = s.indexOf(SYMBOL_START)
+        var actionTagIndex = 0
 
-            charLoop@
-            for (index in symbolTagIndex + 1 until result.length) {
+        var insideRegex = false
 
-                val currentChar = result[index]
+        for (index in symbolTagIndex + 1 until s.length) {
+            if (s[index] == REGEX_DELIMITER) {
+                insideRegex = !insideRegex
+                continue
+            }
 
-                if (currentChar == REGEX_DELIMITER) {
-                    insideRegex = !insideRegex
-                    continue
+            if (insideRegex)
+                continue
+
+            when (s[index]) {
+                SYMBOL_START -> { symbolTagIndex = index }
+
+                ACTION_START -> { actionTagIndex = index }
+
+                SYMBOL_END -> {
+                    val key = s.substring(symbolTagIndex + 1, index)
+
+                    val expandedText = expandSymbol(key)
+
+                    var extraChars = 1
+
+                    // applying modifiers can result in text being empty
+                    // so need to compensate for extra space either in front or before
+                    if (expandedText.isEmpty()) {
+                        // use previous space char
+                        if (symbolTagIndex > 0) {
+                            symbolTagIndex--
+
+                            // else use next space char
+                        } else if (index + 1 < s.length) {
+                            extraChars = 2
+                        }
+                    }
+
+                    return s.replaceRange(symbolTagIndex, index + extraChars, expandedText)
                 }
 
-                if (insideRegex)
-                    continue
+                ACTION_END -> {
+                    val action = s.substring(actionTagIndex + 1, index)
 
-                when (currentChar) {
-                    SYMBOL_START -> {
-                        symbolTagIndex = index
-                    }
+                    expandAction(action)
 
-                    ACTION_START -> {
-                        actionTagIndex = index
-                    }
-
-                    // TODO: extract into functions
-                    SYMBOL_END -> {
-                        val key = result.substring(symbolTagIndex + 1, index)
-
-                        // key has maximal form: key#regex#.mod.mod
-                        // so if we have regex or modifier, if we don't have either, then the original string is returned
-                        val symbolName = key.substringBefore( if (key.hasRegex()) REGEX_DELIMITER else MODIFIER_OPERATOR )
-
-
-
-
-
-                        // TODO: generalize
-                        val newValue = if (symbolName == "num") {
-                            random.nextInt(Int.MAX_VALUE).toString()
-                        } else {
-                            val regex = if (key.hasRegex()) key.substringBetween(REGEX_DELIMITER) else ""
-
-                            getSymbol(symbolName).selectRule(regex).text
-                        }
-
-                        var expandedText = expand(newValue)
-
-                        if (key.hasModifiers()) {
-                            // clean from regex then apply mods
-                            expandedText = applyModifiers(expandedText, key.substringAfterLast(REGEX_DELIMITER).split(MODIFIER_OPERATOR).drop(1))
-                        }
-
-                        var extraChars = 1
-
-                        // applying modifiers can result in text being empty
-                        // so need to compensate for extra space either in front or before
-                        if (expandedText.isEmpty()) {
-                            // use previous space char
-                            if (symbolTagIndex > 0) {
-                                symbolTagIndex--
-                            } else if (index + 1 < result.length) {
-                                extraChars = 2
-                            }
-                        }
-
-                        // update result
-                        result = result.replaceRange(symbolTagIndex, index + extraChars, expandedText)
-                        break@charLoop
-                    }
-
-                    ACTION_END -> {
-                        val action = result.substring(actionTagIndex + 1, index)
-
-                        if (action.isNotEmpty()) {
-                            val tokens = action.split(ACTION_OPERATOR)
-
-                            // action is of form key:rule1,rule2,rule3
-                            // so tokens[0] is key
-                            // and tokens[1] is rule1,rule2,rule3
-
-                            runtimeSymbols[tokens[0]] = Symbol(tokens[0], tokens[1].split(MULTIPLE_ACTION_DELIMITER).map { Rule(it) }.toSet())
-                        }
-
-                        // and clear action from result text
-                        result = result.replaceRange(actionTagIndex, index+1, "")
-                        break@charLoop
-                    }
+                    // and clear action from result text
+                    return s.replaceRange(actionTagIndex, index+1, "")
                 }
             }
         }
 
-        return result
+        throw parseError("No symbol or action found")
+    }
+
+    /**
+     * Fully expands 1 symbol occurrence.
+     *
+     * [key] has a maximal form: key#regex#.mod.mod.etc
+     */
+    private fun expandSymbol(key: String): String {
+        // if we have regex or modifier, then clean it
+        // if we don't have either, then the original string is returned
+        val symbolName = key.substringBefore( if (key.hasRegex()) REGEX_DELIMITER else MODIFIER_OPERATOR )
+
+        // TODO: generalize by creating special symbols
+        val newValue = if (symbolName == "num") {
+            random.nextInt(Int.MAX_VALUE).toString()
+        } else {
+            val regex = if (key.hasRegex()) key.substringBetween(REGEX_DELIMITER) else ""
+
+            getSymbol(symbolName).selectRule(regex).text
+        }
+
+        // fully expand new value too in case of nested symbols
+        var expandedText = expand(newValue)
+
+        if (key.hasModifiers()) {
+            // clean from regex then apply mods
+            expandedText = applyModifiers(expandedText, key.substringAfterLast(REGEX_DELIMITER).split(MODIFIER_OPERATOR).drop(1))
+        }
+
+        return expandedText
+    }
+
+    /**
+     * [action] has a maximal form key:rule1,rule2,rule3,etc
+     */
+    private fun expandAction(action: String) {
+        if (action.isNotEmpty()) {
+            val tokens = action.split(ACTION_OPERATOR)
+
+            val key = tokens[0]
+            val ruleset = tokens[1].split(MULTIPLE_ACTION_DELIMITER).map { Rule(it) }.toSet()
+
+            runtimeSymbols[key] = Symbol(key, ruleset)
+        }
     }
 
     private fun getSymbol(name: String): Symbol {
