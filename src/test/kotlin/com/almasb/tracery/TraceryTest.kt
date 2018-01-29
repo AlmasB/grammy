@@ -86,7 +86,7 @@ class TraceryTest {
         val grammar = Tracery.createGrammar(json)
         val expandedText = grammar.flatten("sentence")
 
-        assertThat(expandedText, `is`("Purple unicorns are always indignant. A kitten is impassioned, unless it is an orange one."))
+        assertThat(expandedText, `is`("Purple unicorns are always indignant. A kitten is impassioned, unless it is an orange one. Truly!"))
     }
 
     @ParameterizedTest
