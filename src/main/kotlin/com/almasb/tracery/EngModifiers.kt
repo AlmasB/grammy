@@ -42,7 +42,7 @@ private fun load(): List<Modifier> {
                 if (!s.dropLast(1).last().isVowel()) {
                     s.dropLast(1) + "ied"
                 } else {
-                    s + "d"
+                    s + "ed"
                 }
             }
             else -> s + "ed"

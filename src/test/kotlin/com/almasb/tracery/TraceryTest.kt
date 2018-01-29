@@ -5,10 +5,16 @@ import org.hamcrest.Matchers.*
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
 import org.junit.jupiter.params.provider.ValueSource
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
+import java.util.Arrays
+import java.util.stream.Stream
+
+
 
 /**
  *
@@ -72,7 +78,7 @@ class TraceryTest {
     }
 
     @Test
-    fun `Modifiers`() {
+    fun `Modifiers in a sentence`() {
         Tracery.setRandom(Random(15))
 
         val json = readJSON("modifiers.json")
@@ -81,6 +87,18 @@ class TraceryTest {
         val expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("Purple unicorns are always wistful. An owl is often courteous, unless it is an orange one."))
+    }
+
+    @ParameterizedTest
+    @MethodSource("modifierArgs")
+    fun `Modifiers`(rule: String, modifierName: String, result: String) {
+        Tracery.setRandom(Random(0))
+
+        val grammar = Tracery.createGrammar()
+        grammar.addSymbol("name", setOf(rule))
+        grammar.addSymbol("origin", setOf("{name.$modifierName}"))
+
+        assertThat(grammar.flatten(), `is`(result))
     }
 
     @Test
@@ -258,5 +276,27 @@ class TraceryTest {
 
     private fun readJSON(fileName: String): String {
         return Files.readAllLines(Paths.get(javaClass.getResource(fileName).toURI())).joinToString("")
+    }
+
+    companion object {
+        @JvmStatic fun modifierArgs(): List<Arguments> {
+            return listOf(
+                    // format:  expanded tag, modifier name, result
+                    Arguments.of("text", "capitalizeAll", "TEXT"),
+                    Arguments.of("text", "capitalize", "Text"),
+                    Arguments.of("text", "s", "texts"),
+                    Arguments.of("dish", "s", "dishes"),
+                    Arguments.of("fix", "s", "fixes"),
+                    Arguments.of("pass", "s", "passes"),
+                    Arguments.of("ally", "s", "allies"),
+                    Arguments.of("key", "s", "keys"),
+                    Arguments.of("text", "a", "a text"),
+                    Arguments.of("apple", "a", "an apple"),
+                    Arguments.of("kill", "ed", "killed"),
+                    Arguments.of("fire", "ed", "fired"),
+                    Arguments.of("fry", "ed", "fried"),
+                    Arguments.of("stay", "ed", "stayed")
+            )
+        }
     }
 }
