@@ -1,5 +1,5 @@
 {
-  "sentence": ["{color.capitalize} {animal.s} are {often} {mood}.","{animal.a.capitalize} is {often} {mood}, unless it is {color.a} one."],
+  "sentence": ["{color.capitalize} {animal.s} are {often.optional(75)} {mood}.","{animal.a.capitalize} is {often.optional(15)} {mood}, unless it is {color.a} one."],
   "often": ["rarely","never","often","almost always","always","sometimes"],
   "color": ["orange","blue","white","black","grey","purple","indigo","turquoise"],
   "animal": ["unicorn","raven","sparrow","scorpion","coyote","eagle","owl","lizard","zebra","duck","kitten"],

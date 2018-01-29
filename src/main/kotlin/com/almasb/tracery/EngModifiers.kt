@@ -61,6 +61,15 @@ private fun load(): List<Modifier> {
         "a " + s
     })
 
+    add("optional", { s, args ->
+        val chance = if (args.isNotEmpty()) args[0].toInt() else 50
+
+        if (Tracery.random.nextInt(100) < chance)
+            s
+        else
+            ""
+    })
+
     return modifiers
 }
 

@@ -231,8 +231,21 @@ class Grammar {
                             expandedText = applyModifiers(expandedText, key.substringAfterLast(REGEX_DELIMITER).split(MODIFIER_OPERATOR).drop(1))
                         }
 
+                        var extraChars = 1
+
+                        // applying modifiers can result in text being empty
+                        // so need to compensate for extra space either in front or before
+                        if (expandedText.isEmpty()) {
+                            // use previous space char
+                            if (symbolTagIndex > 0) {
+                                symbolTagIndex--
+                            } else if (index + 1 < result.length) {
+                                extraChars = 2
+                            }
+                        }
+
                         // update result
-                        result = result.replaceRange(symbolTagIndex, index+1, expandedText)
+                        result = result.replaceRange(symbolTagIndex, index + extraChars, expandedText)
                         break@charLoop
                     }
 
@@ -273,8 +286,16 @@ class Grammar {
         modifierNames.forEach { name ->
 
             // check if a modifier has params (function call)
-            if (name.contains("(")) {
-                // TODO: split the name and args, call apply appropriately
+            if (name.contains('(')) {
+
+                val modName = name.substringBefore('(')
+
+                val params = name.substringAfter('(').substringBefore(')').split(",")
+
+                val modifier = ENG_MODIFIERS.find { it.name == modName } ?: throw IllegalArgumentException("Modifier $modName not found!")
+
+                result = modifier.apply(result, *params.toTypedArray())
+
             } else {
                 val modifier = ENG_MODIFIERS.find { it.name == name } ?: throw IllegalArgumentException("Modifier $name not found!")
 
