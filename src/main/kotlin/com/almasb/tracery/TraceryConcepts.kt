@@ -34,7 +34,7 @@ class Rule(val text: String) {
 
     init {
         if (text.isEmpty())
-            fail("Rule cannot be empty")
+            throw error("Rule cannot be empty")
     }
 
     override fun toString(): String = text
@@ -68,10 +68,10 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
 
     init {
         if (key.isEmpty())
-            fail("Symbol key cannot be empty")
+            throw error("Symbol key cannot be empty")
 
         if (ruleset.isEmpty())
-            fail("Ruleset cannot be empty")
+            throw error("Ruleset cannot be empty")
 
         val withDistributions = ruleset.filter { it.text.endsWith(")") }
         withoutDistr = ruleset.minus(withDistributions)
@@ -89,7 +89,7 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
         }
 
         if (bound > 100) {
-            fail("Rule distributions for $key are greater than 100%")
+            throw error("Rule distributions for $key are greater than 100%")
         }
     }
 
@@ -104,7 +104,7 @@ class Symbol(val key: String, val ruleset: Set<Rule>) {
             val valid = distributions.values.plus(withoutDistr).filter { it.text.matches(regex.toRegex()) }
 
             if (valid.isEmpty()) {
-                throw IllegalStateException("No matching rule found!")
+                throw error("No matching rule found")
             }
 
             return valid[random.nextInt(valid.size)]
@@ -155,9 +155,7 @@ class Grammar {
     fun flatten() = flatten("origin")
 
     fun flatten(startSymbolKey: String): String {
-        val firstSymbol = symbols[startSymbolKey] ?: throw parseError("Symbol key not found: $startSymbolKey")
-
-        val story = firstSymbol.ruleset.joinToString(" ")
+        val story = getSymbol(startSymbolKey).ruleset.joinToString(" ")
 
         return expand(story)
     }
@@ -233,7 +231,7 @@ class Grammar {
             }
         }
 
-        throw parseError("No symbol or action found")
+        throw error("No symbol or action found")
     }
 
     /**
@@ -281,7 +279,7 @@ class Grammar {
     }
 
     private fun getSymbol(name: String): Symbol {
-        return symbols[name] ?: runtimeSymbols[name] ?: throw parseError("Symbol key \"$name\" not found!")
+        return symbols[name] ?: runtimeSymbols[name] ?: throw error("Symbol key \"$name\" not found!")
     }
 
     /**
@@ -348,13 +346,8 @@ class Grammar {
 }
 
 class TracerySyntaxException(message: String) : RuntimeException(message)
-class TraceryParseException(message: String) : RuntimeException(message)
 
-private fun fail(message: String) {
-    throw TracerySyntaxException(message)
-}
-
-private fun parseError(message: String) = TraceryParseException(message)
+private fun error(message: String) = TracerySyntaxException(message)
 
 private fun String.hasSymbols(): Boolean = this.contains(SYMBOL_START)
 private fun String.hasRegex(): Boolean = this.contains(REGEX_DELIMITER)

@@ -7,6 +7,9 @@ import java.util.Random;
  */
 public final class Tracery {
 
+    // this might be needed in the future to preserve the state
+    private static final Tracery instance = new Tracery();
+
     private Tracery() {}
 
     static Random random = new Random();

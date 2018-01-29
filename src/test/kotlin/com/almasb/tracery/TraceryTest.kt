@@ -232,10 +232,12 @@ class TraceryTest {
 
         assertThat(expansion, `is`("Krox was a great baker, and this song tells of her adventure. Krox baked bread, then she made croissants, then she went home to read a book."))
 
-        assertThat(grammar.flatten(), `is`("Brick was a great warrior, and this song tells of his adventure. Brick fought a golem, then he defeated a giant, then he went home to read a book."))
-        assertThat(grammar.flatten(), `is`("Morgana was a great baker, and this song tells of her adventure. Morgana folded dough, then she iced a cake, then she went home to read a book."))
-        assertThat(grammar.flatten(), `is`("Urga was a great baker, and this song tells of his adventure. Urga folded dough, then he folded dough, then he went home to read a book."))
-        assertThat(grammar.flatten(), `is`("Cheri was a great warrior, and this song tells of their adventure. Cheri defeated a sphinx, then they defeated a sphinx, then they went home to read a book."))
+        assertThat(grammar.flatten(), `is`("Brick was a great warrior, and this song tells of his adventure. Brick defeated a giant, then he battled an ogre, then he went home to read a book."))
+        assertThat(grammar.flatten(), `is`("Cheri was a great warrior, and this song tells of his adventure. Cheri battled a goblin, then he saved a village from a goblin, then he went home to read a book."))
+        assertThat(grammar.flatten(), `is`("Zelph was a great warrior, and this song tells of their adventure. Zelph fought a witch, then they battled a giant, then they went home to read a book."))
+        assertThat(grammar.flatten(), `is`("Jedoo was a great warrior, and this song tells of their adventure. Jedoo battled an ogre, then they defeated a golem, then they went home to read a book."))
+
+        assertThat(grammar.flatten(), `is`("Zelph was a great baker, and this song tells of her adventure. Zelph iced a cake, then she decorated cupcakes, then she went home to read a book."))
     }
 
     // FORMAL DEFINITION TESTS
@@ -280,7 +282,18 @@ class TraceryTest {
     fun `Fail if grammar has no starting symbol`() {
         val grammar = Tracery.createGrammar()
 
-        assertThrows(TraceryParseException::class.java, {
+        assertThrows(TracerySyntaxException::class.java, {
+            grammar.flatten()
+        })
+    }
+
+    @Test
+    fun `Fail if no matching regex`() {
+        val grammar = Tracery.createGrammar()
+        grammar.addSymbol("name", setOf("text"))
+        grammar.addSymbol("origin", setOf("{name#...#}"))
+
+        assertThrows(TracerySyntaxException::class.java, {
             grammar.flatten()
         })
     }
