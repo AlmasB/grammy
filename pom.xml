@@ -4,7 +4,7 @@
 
     <groupId>com.github.almasb</groupId>
     <artifactId>grammy</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>0.0.2</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>

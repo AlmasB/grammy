@@ -82,7 +82,7 @@ Grammar grammar = ...
 grammar.flatten();
 ```
 
-While the possible outputs follow the same (defined) structure, there's a great variety that can be achieved:
+While the possible outputs follow the same (defined) structure, there's a great variety in what can be achieved:
 
 ```
 Good day! My name is Helen. I'm your virtual assistant for today. What may I do for you? You can ask for Helen next time you need help. Take care!
@@ -118,14 +118,14 @@ Hello! The name's Alice. How do you do? I'll be your digital assistant today. Ho
 <dependency>
     <groupId>com.github.almasb</groupId>
     <artifactId>grammy</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-compile 'com.github.almasb:grammy:0.0.1'
+compile 'com.github.almasb:grammy:0.0.2'
 ```
 
 ### Uber-jar
