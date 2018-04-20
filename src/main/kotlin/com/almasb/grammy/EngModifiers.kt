@@ -1,4 +1,4 @@
-package com.almasb.tracery
+package com.almasb.grammy
 
 /**
  *
@@ -64,7 +64,7 @@ private fun load(): List<Modifier> {
     add("optional", { s, args ->
         val chance = if (args.isNotEmpty()) args[0].toInt() else 50
 
-        if (Tracery.random.nextInt(100) < chance)
+        if (Grammy.random.nextInt(100) < chance)
             s
         else
             ""

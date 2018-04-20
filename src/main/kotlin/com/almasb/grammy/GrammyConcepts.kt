@@ -1,11 +1,11 @@
-package com.almasb.tracery
+package com.almasb.grammy
 
-import com.almasb.tracery.Tracery.random
+import com.almasb.grammy.Grammy.random
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import java.util.HashMap
 
 /*
- * The original specification of Tracery by Kate Compton can be found at https://github.com/galaxykate/tracery/tree/tracery2
+ * The original specification of Grammy by Kate Compton can be found at https://github.com/galaxykate/tracery/tree/tracery2
  *
  * This implementation introduces new concepts and more functionality via new syntax.
  * The syntax used here is incompatible with the original.
@@ -13,7 +13,7 @@ import java.util.HashMap
  * @author Almas Baimagambetov (almaslvl@gmail.com)
  */
 
-// These are reserved Tracery characters
+// These are reserved Grammy characters
 private val SYMBOL_START = '{'
 private val SYMBOL_END = '}'
 private val ACTION_START = '['
@@ -46,7 +46,7 @@ class Rule(val text: String) {
  * Each top-level key-value pair in the raw JSON object creates a **symbol**.
  * The pair key becomes the symbol's **key**, and the pair value determines the **ruleset**.
  *
- * Placing a **key** between '{' and '}', in a Tracery syntax object, will create a expansion node for that symbol within the text.
+ * Placing a **key** between '{' and '}', in a Grammy syntax object, will create a expansion node for that symbol within the text.
  * Example: "The color is {color}."
  *
  * An action can be used to generate runtime symbols.

@@ -3,13 +3,13 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.almasb</groupId>
-    <artifactId>tracery</artifactId>
+    <artifactId>grammy</artifactId>
     <version>0.0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <description>A story-grammar generation library</description>
-    <url>https://github.com/AlmasB/tracery</url>
+    <url>https://github.com/AlmasB/grammy</url>
 
     <licenses>
         <license>
@@ -20,9 +20,9 @@
     </licenses>
 
     <scm>
-        <url>https://github.com/AlmasB/tracery</url>
-        <connection>scm:git:git://github.com/AlmasB/tracery.git</connection>
-        <developerConnection>scm:git:git@github.com:AlmasB/tracery.git</developerConnection>
+        <url>https://github.com/AlmasB/grammy</url>
+        <connection>scm:git:git://github.com/AlmasB/grammy.git</connection>
+        <developerConnection>scm:git:git@github.com:AlmasB/grammy.git</developerConnection>
     </scm>
 
     <developers>
@@ -42,7 +42,7 @@
     </distributionManagement>
 
     <issueManagement>
-        <url>https://github.com/AlmasB/tracery/issues</url>
+        <url>https://github.com/AlmasB/grammy/issues</url>
         <system>GitHub Issues</system>
     </issueManagement>
 
@@ -62,7 +62,7 @@
         <maven.surefire.version>2.19</maven.surefire.version>
 
         <!-- dependencies -->
-        <kotlin.version>1.1.51</kotlin.version>
+        <kotlin.version>1.2.30</kotlin.version>
         <jackson.version>2.9.3</jackson.version>
 
         <!-- test dependencies -->
@@ -231,7 +231,7 @@
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>${maven.shade.version}</version>
                 <configuration>
-                    <outputFile>${project.build.directory}/tracery-${project.version}-uber.jar</outputFile>
+                    <outputFile>${project.build.directory}/grammy-${project.version}-uber.jar</outputFile>
                 </configuration>
                 <executions>
                     <!-- Run shade goal on package phase -->

@@ -1,24 +1,24 @@
-package com.almasb.tracery;
+package com.almasb.grammy;
 
 import java.util.Random;
 
 /**
  * @author Almas Baimagambetov (almaslvl@gmail.com)
  */
-public final class Tracery {
+public final class Grammy {
 
     // this might be needed in the future to preserve the state
-    private static final Tracery instance = new Tracery();
+    private static final Grammy instance = new Grammy();
 
-    private Tracery() {}
+    private Grammy() {}
 
     static Random random = new Random();
 
     /**
-     * Set random number generator to make Tracery deterministic.
+     * Set random number generator to make Grammy deterministic.
      */
     public static void setRandom(Random random) {
-        Tracery.random = random;
+        Grammy.random = random;
     }
 
     /**
@@ -29,7 +29,7 @@ public final class Tracery {
     }
 
     /**
-     * Create grammar from a JSON string in Tracery format.
+     * Create grammar from a JSON string in Grammy format.
      */
     public static Grammar createGrammar(String json) {
         Grammar grammar = createGrammar();

@@ -1,9 +1,9 @@
 ### About
 This is a JVM port of Kate Compton's story-grammar generator - [Tracery](https://github.com/galaxykate/tracery) 
 
-![Maven](https://img.shields.io/maven-central/v/com.github.almasb/tracery.svg)
-[![Build Status](https://travis-ci.org/AlmasB/tracery.svg?branch=master)](https://travis-ci.org/AlmasB/tracery)
-[![codecov](https://codecov.io/gh/AlmasB/tracery/branch/master/graph/badge.svg)](https://codecov.io/gh/AlmasB/tracery)
+![Maven](https://img.shields.io/maven-central/v/com.github.almasb/grammy.svg)
+[![Build Status](https://travis-ci.org/AlmasB/grammy.svg?branch=master)](https://travis-ci.org/AlmasB/grammy)
+[![codecov](https://codecov.io/gh/AlmasB/grammy/branch/master/graph/badge.svg)](https://codecov.io/gh/AlmasB/grammy)
 
 ### Usage
 
@@ -21,9 +21,9 @@ We can create `Grammar` as follows:
 
 ```
 String json = ...
-Grammar grammar = Tracery.createGrammar(json);
+Grammar grammar = Grammy.createGrammar(json);
 
-String output = grammar.flatten("#emotion#");
+String output = grammar.flatten("emotion");
 
 // output is one of "happy", "sad" or "proud"
 ```
@@ -34,7 +34,7 @@ Input:
 
 ```json
 {
-  "sentence": ["The #color# #animal# of the #natureNoun# is called #name#"],
+  "sentence": ["The {color} {animal} of the {natureNoun} is called {name}"],
   "color": ["orange","blue","white","black","grey","purple","indigo","turquoise"],
   "animal": ["unicorn","raven","sparrow","coyote","eagle","owl","zebra","duck","kitten"],
   "natureNoun": ["ocean","mountain","forest","cloud","river","tree","sky","sea","desert"],
@@ -46,7 +46,7 @@ Code:
 
 ```
 Grammar grammar = ...
-grammar.flatten("#sentence#");
+grammar.flatten("sentence");
 ```
 
 Possible Output:
@@ -60,7 +60,7 @@ The orange zebra of the sky is called Mia
 ```
 <dependency>
     <groupId>com.github.almasb</groupId>
-    <artifactId>tracery</artifactId>
+    <artifactId>grammy</artifactId>
     <version>0.0.1</version>
 </dependency>
 ```
@@ -68,12 +68,12 @@ The orange zebra of the sky is called Mia
 ### Gradle
 
 ```
-compile 'com.github.almasb:tracery:0.0.1'
+compile 'com.github.almasb:grammy:0.0.1'
 ```
 
 ### Uber-jar
 
-Pre-compiled version available from [Releases](https://github.com/AlmasB/tracery/releases).
+Pre-compiled version available from [Releases](https://github.com/AlmasB/grammy/releases).
 
 ### Notes
 

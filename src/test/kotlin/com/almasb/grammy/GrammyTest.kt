@@ -1,4 +1,4 @@
-package com.almasb.tracery
+package com.almasb.grammy
 
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
@@ -11,9 +11,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import java.util.Arrays
-import java.util.stream.Stream
-
 
 
 /**
@@ -21,16 +18,16 @@ import java.util.stream.Stream
  *
  * @author Almas Baimagambetov (almaslvl@gmail.com)
  */
-class TraceryTest {
+class GrammyTest {
 
     // TODO: extract common code from tests
-    // TODO: use @BeforeEach to set up tracery random
+    // TODO: use @BeforeEach to set up grammy random
 
     @Test
     fun `Basic syntax 1`() {
         val json = readJSON("simple1.json")
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expandedText = grammar.flatten("animal")
 
         assertThat(expandedText, `is`("unicorn raven"))
@@ -40,7 +37,7 @@ class TraceryTest {
     fun `Basic syntax 2`() {
         val json = readJSON("simple2.json")
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expandedText = grammar.flatten("randomAnimal")
 
         assertThat(expandedText, either(`is`("unicorn")).or(`is`("raven")))
@@ -48,16 +45,16 @@ class TraceryTest {
 
     @Test
     fun `Basic syntax 3`() {
-        Tracery.setRandom(Random(0))
+        Grammy.setRandom(Random(0))
 
         val json = readJSON("simple3.json")
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         var expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple owl of the river is called Chiaki"))
 
-        Tracery.setRandom(Random(1))
+        Grammy.setRandom(Random(1))
         expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple owl of the mountain is called Mia"))
@@ -65,11 +62,11 @@ class TraceryTest {
 
     @Test
     fun `The same symbol expands to random text`() {
-        Tracery.setRandom(Random(0))
+        Grammy.setRandom(Random(0))
 
         val json = readJSON("simple4.json")
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expandedText = grammar.flatten("sentence")
 
         val tokens = expandedText.split(",")
@@ -79,11 +76,11 @@ class TraceryTest {
 
     @Test
     fun `Modifiers in a sentence`() {
-        Tracery.setRandom(Random(15))
+        Grammy.setRandom(Random(15))
 
         val json = readJSON("modifiers.json")
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("Purple unicorns are always indignant. A kitten is impassioned, unless it is an orange one. Truly!"))
@@ -92,9 +89,9 @@ class TraceryTest {
     @ParameterizedTest
     @MethodSource("modifierArgs")
     fun `Modifiers`(rule: String, modifierName: String, result: String) {
-        Tracery.setRandom(Random(0))
+        Grammy.setRandom(Random(0))
 
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
         grammar.addSymbol("name", setOf(rule))
         grammar.addSymbol("origin", setOf("{name.$modifierName}"))
 
@@ -103,9 +100,9 @@ class TraceryTest {
 
     @Test
     fun `Modifier optional edge case`() {
-        Tracery.setRandom(Random(0))
+        Grammy.setRandom(Random(0))
 
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
         grammar.addSymbol("name", setOf("name"))
         grammar.addSymbol("origin", setOf("{name.optional(0)}"))
 
@@ -114,11 +111,11 @@ class TraceryTest {
 
     @Test
     fun `Recursive`() {
-        Tracery.setRandom(Random(15))
+        Grammy.setRandom(Random(15))
 
         val json = readJSON("recursive.json")
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple unicorn of the mountain is called Darcy"))
@@ -128,11 +125,11 @@ class TraceryTest {
     @ValueSource(strings = arrayOf("nested1.json", "nested2.json"))
     fun `Nested`(jsonFile: String) {
 
-        Tracery.setRandom(Random(15))
+        Grammy.setRandom(Random(15))
 
         val json = readJSON(jsonFile)
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expandedText = grammar.flatten("animal")
 
         assertThat(expandedText, either(`is`("zebra")).or(`is`("horse")))
@@ -142,7 +139,7 @@ class TraceryTest {
     fun `Write to JSON`() {
         val json = readJSON("modifiers.json")
 
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val generated = grammar.toJSON()
 
         assertThat(generated.replace("\n", ""), `is`(json))
@@ -150,10 +147,10 @@ class TraceryTest {
 
     @Test
     fun `Actions`() {
-        Tracery.setRandom(Random(5))
+        Grammy.setRandom(Random(5))
 
         val json = readJSON("action.json")
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never astute, for the raven was always too impassioned."))
@@ -162,10 +159,10 @@ class TraceryTest {
     @Test
     fun `Regex selection`() {
         for (i in 1..15) {
-            Tracery.setRandom(Random(i.toLong()))
+            Grammy.setRandom(Random(i.toLong()))
 
             val json = readJSON("regex.json")
-            val grammar = Tracery.createGrammar(json)
+            val grammar = Grammy.createGrammar(json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("cow")).or(`is`("sparrow")))
@@ -175,10 +172,10 @@ class TraceryTest {
     @Test
     fun `Regex selection 2`() {
         for (i in 1..15) {
-            Tracery.setRandom(Random(i.toLong()))
+            Grammy.setRandom(Random(i.toLong()))
 
             val json = readJSON("regex2.json")
-            val grammar = Tracery.createGrammar(json)
+            val grammar = Grammy.createGrammar(json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("cow")).or(`is`("duck")))
@@ -188,10 +185,10 @@ class TraceryTest {
     @Test
     fun `Regex selection 3`() {
         for (i in 1..15) {
-            Tracery.setRandom(Random(i.toLong()))
+            Grammy.setRandom(Random(i.toLong()))
 
             val json = readJSON("regex3.json")
-            val grammar = Tracery.createGrammar(json)
+            val grammar = Grammy.createGrammar(json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("coyote")).or(`is`("eagle")))
@@ -200,10 +197,10 @@ class TraceryTest {
 
     @Test
     fun `Num keyword`() {
-        Tracery.setRandom(Random(5))
+        Grammy.setRandom(Random(5))
 
         val json = readJSON("num.json")
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("There are 1568779487 ravens with 189533474 different colors, but mainly grey."))
@@ -212,10 +209,10 @@ class TraceryTest {
     @Test
     fun `Distribution in selection`() {
         for (i in 1..50) {
-            Tracery.setRandom(Random(i.toLong() * 100))
+            Grammy.setRandom(Random(i.toLong() * 100))
 
             val json = readJSON("distribution.json")
-            val grammar = Tracery.createGrammar(json)
+            val grammar = Grammy.createGrammar(json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("unicorn")).or(`is`("raven")))
@@ -224,10 +221,10 @@ class TraceryTest {
 
     @Test
     fun `Story`() {
-        Tracery.setRandom(Random(99))
+        Grammy.setRandom(Random(99))
 
         val json = readJSON("story.json")
-        val grammar = Tracery.createGrammar(json)
+        val grammar = Grammy.createGrammar(json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("Krox was a great baker, and this song tells of her adventure. Krox baked bread, then she made croissants, then she went home to read a book."))
@@ -244,7 +241,7 @@ class TraceryTest {
 
     @Test
     fun `A rule cannot be empty`() {
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(TracerySyntaxException::class.java, {
             grammar.addSymbol("key", setOf(""))
@@ -253,7 +250,7 @@ class TraceryTest {
 
     @Test
     fun `A symbol key cannot be empty`() {
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(TracerySyntaxException::class.java, {
             grammar.addSymbol("", setOf("rule1", "rule2"))
@@ -262,7 +259,7 @@ class TraceryTest {
 
     @Test
     fun `A symbol ruleset cannot be empty`() {
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(TracerySyntaxException::class.java, {
             grammar.addSymbol("key", setOf())
@@ -271,7 +268,7 @@ class TraceryTest {
 
     @Test
     fun `A symbol total rule distribution value does not exceed 100`() {
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(TracerySyntaxException::class.java, {
             grammar.addSymbol("key", setOf("rule1(50)", "rule2(51)"))
@@ -280,7 +277,7 @@ class TraceryTest {
 
     @Test
     fun `Fail if grammar has no starting symbol`() {
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(TracerySyntaxException::class.java, {
             grammar.flatten()
@@ -289,7 +286,7 @@ class TraceryTest {
 
     @Test
     fun `Fail if no matching regex`() {
-        val grammar = Tracery.createGrammar()
+        val grammar = Grammy.createGrammar()
         grammar.addSymbol("name", setOf("text"))
         grammar.addSymbol("origin", setOf("{name#...#}"))
 
