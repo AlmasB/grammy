@@ -1,7 +1,7 @@
 package com.almasb.grammy
 
 import com.almasb.grammy.Grammy.random
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.fasterxml.jackson.databind.ObjectMapper
 import java.util.HashMap
 
 /*
@@ -318,7 +318,7 @@ class Grammar {
         symbols.clear()
         runtimeSymbols.clear()
 
-        val rootObject = jacksonObjectMapper().readTree(json)
+        val rootObject = ObjectMapper().readTree(json)
 
         rootObject.fields().forEach {
             addSymbol(it.key, it.value.asSequence().map { it.asText() }.toSet())
