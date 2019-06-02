@@ -145,6 +145,18 @@ abstract class Modifier(val name: String) {
  */
 class Grammar {
 
+    companion object {
+        /**
+         * Special symbols have a key like normal symbols, but instead of a ruleset,
+         * they are able to produce programmatic values, not hardcoded.
+         */
+        private val specialSymbols: HashMap<String, (String) -> String> = linkedMapOf()
+
+        init {
+            specialSymbols["num"] = { random.nextInt(Int.MAX_VALUE).toString() }
+        }
+    }
+
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
     private val runtimeSymbols: HashMap<String, Symbol> = linkedMapOf()
 
@@ -243,14 +255,9 @@ class Grammar {
         // if we don't have either, then the original string is returned
         val symbolName = key.substringBefore( if (key.hasRegex()) REGEX_DELIMITER else MODIFIER_OPERATOR )
 
-        // TODO: generalize by creating special symbols
-        val newValue = if (symbolName == "num") {
-            random.nextInt(Int.MAX_VALUE).toString()
-        } else {
-            val regex = if (key.hasRegex()) key.substringBetween(REGEX_DELIMITER) else ""
+        val regex = if (key.hasRegex()) key.substringBetween(REGEX_DELIMITER) else ""
 
-            getSymbol(symbolName).selectRule(regex).text
-        }
+        val newValue = specialSymbols[symbolName]?.invoke(regex) ?: getSymbol(symbolName).selectRule(regex).text
 
         // fully expand new value too in case of nested symbols
         var expandedText = expand(newValue)
