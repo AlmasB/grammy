@@ -14,16 +14,16 @@ import java.util.HashMap
  */
 
 // These are reserved Grammy characters
-private val SYMBOL_START = '{'
-private val SYMBOL_END = '}'
-private val ACTION_START = '['
-private val ACTION_END = ']'
-private val ACTION_OPERATOR = ':'
-private val MULTIPLE_ACTION_DELIMITER = ','
-private val DISTRIBUTION_START = '('
-private val DISTRIBUTION_END = ')'
-private val REGEX_DELIMITER = '#'
-private val MODIFIER_OPERATOR = '.'
+private const val SYMBOL_START = '{'
+private const val SYMBOL_END = '}'
+private const val ACTION_START = '['
+private const val ACTION_END = ']'
+private const val ACTION_OPERATOR = ':'
+private const val MULTIPLE_ACTION_DELIMITER = ','
+private const val DISTRIBUTION_START = '('
+private const val DISTRIBUTION_END = ')'
+private const val REGEX_DELIMITER = '#'
+private const val MODIFIER_OPERATOR = '.'
 
 /**
  * A rule is a non-empty string.
