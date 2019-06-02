@@ -161,16 +161,15 @@ class Grammar {
     }
 
     /**
-     * Fully expand given string, i.e. the returned value will not have symbols.
+     * Fully expand given string, i.e. the returned value will not have symbols or actions.
      */
     private fun expand(s: String): String {
-        if (!s.hasSymbols())
+        if (!(s.hasSymbols() || s.hasActions()))
             return s
 
         var result = s
 
-        // TODO: or actions?
-        while (result.hasSymbols()) {
+        while (result.hasSymbols() || result.hasActions()) {
             result = expandSymbolOrAction(result)
         }
 
@@ -178,12 +177,12 @@ class Grammar {
     }
 
     private fun expandSymbolOrAction(s: String): String {
-        var symbolTagIndex = s.indexOf(SYMBOL_START)
+        var symbolTagIndex = 0
         var actionTagIndex = 0
 
         var insideRegex = false
 
-        for (index in symbolTagIndex + 1 until s.length) {
+        for (index in 0 until s.length) {
             if (s[index] == REGEX_DELIMITER) {
                 insideRegex = !insideRegex
                 continue
@@ -208,11 +207,11 @@ class Grammar {
                     // so need to compensate for extra space either in front or before
                     if (expandedText.isEmpty()) {
                         // use previous space char
-                        if (symbolTagIndex > 0) {
+                        if (symbolTagIndex > 0 && s[symbolTagIndex-1] == ' ') {
                             symbolTagIndex--
 
                             // else use next space char
-                        } else if (index + 1 < s.length) {
+                        } else if (index + 1 < s.length && s[index+1] == ' ') {
                             extraChars = 2
                         }
                     }
@@ -350,6 +349,7 @@ class TracerySyntaxException(message: String) : RuntimeException(message)
 private fun error(message: String) = TracerySyntaxException(message)
 
 private fun String.hasSymbols(): Boolean = this.contains(SYMBOL_START)
+private fun String.hasActions(): Boolean = this.contains(ACTION_START)
 private fun String.hasRegex(): Boolean = this.contains(REGEX_DELIMITER)
 private fun String.hasModifiers(): Boolean = this.contains(MODIFIER_OPERATOR)
 

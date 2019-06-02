@@ -157,6 +157,28 @@ class GrammyTest {
     }
 
     @Test
+    fun `Nested Actions`() {
+        Grammy.setRandom(Random(5))
+
+        val json = readJSON("nested_actions.json")
+        val grammar = Grammy.createGrammar(json)
+        val expansion = grammar.flatten()
+
+        assertThat(expansion, `is`("1, 1, 2"))
+    }
+
+    @Test
+    fun `Action without symbol notation`() {
+        Grammy.setRandom(Random(5))
+
+        val json = readJSON("action_without_symbol.json")
+        val grammar = Grammy.createGrammar(json)
+        val expansion = grammar.flatten()
+
+        assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never courteous, for the raven was always too vexed and vexed."))
+    }
+
+    @Test
     fun `Regex selection`() {
         for (i in 1..15) {
             Grammy.setRandom(Random(i.toLong()))

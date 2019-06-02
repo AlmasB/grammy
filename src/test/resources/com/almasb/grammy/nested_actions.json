@@ -1,0 +1,8 @@
+{
+  "myNumber": ["1", "2"],
+  "delegate": ["[i:{myNumber}]"],
+  "delegate2": ["i2:{myNumber}"],
+  "delegate3": ["[i3:{myNumber}]"],
+  "test": ["[{delegate2}]{i2}"],
+  "origin": ["[{delegate}]{i}, [{delegate2}]{i2}, {delegate3} {i3}"]
+}
