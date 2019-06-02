@@ -14,15 +14,15 @@ private fun load(): List<Modifier> {
     // modifiers are applied after the tag is fully expanded
     // the expanded text, s, is guaranteed to be non-empty
 
-    add("capitalize", { s, args ->
+    add("capitalize") { s, _ ->
         s.first().toUpperCase() + s.drop(1)
-    })
+    }
 
-    add("capitalizeAll", { s, args ->
+    add("capitalizeAll") { s, _ ->
         s.toUpperCase()
-    })
+    }
 
-    add("s", { s, args ->
+    add("s") { s, _ ->
         when (s.last()) {
             in "shx" -> return@add s + "es"
             'y' -> {
@@ -33,9 +33,9 @@ private fun load(): List<Modifier> {
         }
 
         s + "s"
-    })
+    }
 
-    add("ed", { s, args ->
+    add("ed") { s, _ ->
         return@add when (s.last()) {
             'e' -> s + "d"
             'y' -> {
@@ -47,28 +47,24 @@ private fun load(): List<Modifier> {
             }
             else -> s + "ed"
         }
-    })
+    }
 
-    add("a", { s, args ->
-//        if (s[0] in "uU" && s.length > 2 && s[2] in "iI") {
-//            return@add "a " + s
-//        }
-
+    add("a") { s, _ ->
         if (s[0].isVowel()) {
-            return@add "an " + s
+            return@add "an $s"
         }
 
-        "a " + s
-    })
+        "a $s"
+    }
 
-    add("optional", { s, args ->
+    add("optional") { s, args ->
         val chance = if (args.isNotEmpty()) args[0].toInt() else 50
 
         if (Grammy.random.nextInt(100) < chance)
             s
         else
             ""
-    })
+    }
 
     return modifiers
 }
