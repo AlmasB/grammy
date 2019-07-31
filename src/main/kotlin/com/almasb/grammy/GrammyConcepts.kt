@@ -61,10 +61,10 @@ class Rule(val text: String) {
  * Dog and cat will have respectively 30% and 15% chance of being selected, whereas mouse and pig
  * will share the remaining 55% and if the 55% is selected, randomly one of them will be chosen.
  */
-class Symbol(val key: String, val ruleset: Set<Rule>) {
+class Symbol(val key: String, val ruleset: List<Rule>) {
 
     private val distributions = hashMapOf<IntRange, Rule>()
-    private val withoutDistr: Set<Rule>
+    private val withoutDistr: List<Rule>
 
     init {
         if (key.isEmpty())
@@ -160,8 +160,8 @@ class Grammar {
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
     private val runtimeSymbols: HashMap<String, Symbol> = linkedMapOf()
 
-    fun addSymbol(symbolKey: String, ruleset: Set<String>) {
-        symbols[symbolKey] = Symbol(symbolKey, ruleset.map { Rule(it) }.toSet())
+    fun addSymbol(symbolKey: String, ruleset: List<String>) {
+        symbols[symbolKey] = Symbol(symbolKey, ruleset.map { Rule(it) })
     }
 
     fun flatten() = flatten("origin")
@@ -278,7 +278,7 @@ class Grammar {
             val tokens = action.split(ACTION_OPERATOR)
 
             val key = tokens[0]
-            val ruleset = tokens[1].split(MULTIPLE_ACTION_DELIMITER).map { Rule(it) }.toSet()
+            val ruleset = tokens[1].split(MULTIPLE_ACTION_DELIMITER).map { Rule(it) }
 
             runtimeSymbols[key] = Symbol(key, ruleset)
         }
@@ -327,7 +327,7 @@ class Grammar {
         val rootObject = ObjectMapper().readTree(json)
 
         rootObject.fields().forEach {
-            addSymbol(it.key, it.value.asSequence().map { it.asText() }.toSet())
+            addSymbol(it.key, it.value.asSequence().map { it.asText() }.toList())
         }
     }
 
@@ -351,9 +351,9 @@ class Grammar {
     }
 }
 
-class TracerySyntaxException(message: String) : RuntimeException(message)
+class GrammySyntaxException(message: String) : RuntimeException(message)
 
-private fun error(message: String) = TracerySyntaxException(message)
+private fun error(message: String) = GrammySyntaxException(message)
 
 private fun String.hasSymbols(): Boolean = this.contains(SYMBOL_START)
 private fun String.hasActions(): Boolean = this.contains(ACTION_START)
