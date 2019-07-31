@@ -137,6 +137,8 @@ Pre-compiled version available from [Releases](https://github.com/AlmasB/grammy/
 This implementation only loosely follows the [original specification](https://github.com/galaxykate/tracery/tree/tracery2) by Kate Compton.
 So, given the same data, the output may differ.
 
+The word list is used from [wordlist](https://github.com/aaronbassett/Pass-phrase).
+
 ### Contact
 
 ![Gmail](https://img.shields.io/badge/email-almaslvl@gmail.com-red.svg)
