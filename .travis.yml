@@ -5,9 +5,7 @@ cache:
   directories:
   - "~/.m2"
 jdk:
-- oraclejdk8
-- oraclejdk9
-- openjdk8
+- openjdk12
 install:
 -
 after_success:
