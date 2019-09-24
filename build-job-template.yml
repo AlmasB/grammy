@@ -16,9 +16,4 @@ jobs:
         jdkVersionOption: '1.11'
         jdkArchitectureOption: 'x64'
         publishJUnitResults: false
-        goals: 'package'
-    - task: PublishBuildArtifacts@1
-      inputs:
-        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'grammy-${{ parameters.platform }}.zip'
-        publishLocation: 'Container'
+        goals: 'test'
