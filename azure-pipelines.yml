@@ -6,17 +6,27 @@
 trigger:
 - master
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+  # Linux job
+  - template: build-job-template.yml
+    parameters:
+      name: Linux
+      platform: linux
+      pool:
+        vmImage: 'ubuntu-16.04'
 
-steps:
-- task: Maven@3
-  inputs:
-    mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    javaHomeOption: 'JDKVersion'
-    jdkVersionOption: '1.11'
-    jdkArchitectureOption: 'x64'
-    publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    goals: 'package'
+  # Mac OS job
+  - template: build-job-template.yml
+    parameters:
+      name: MacOS
+      platform: mac
+      pool:
+        vmImage: 'macOS-10.13'
+
+  # Windows job
+  - template: build-job-template.yml
+    parameters:
+      name: Windows
+      platform: win
+      pool:
+        vmImage: 'windows-2019'
