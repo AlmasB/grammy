@@ -19,6 +19,9 @@ private const val SYMBOL_END = '}'
 private const val ACTION_START = '['
 private const val ACTION_END = ']'
 private const val ACTION_OPERATOR = ':'
+private const val ACTION_ADD = '+'
+private const val ACTION_SUBTRACT = '-'
+private const val ACTION_RESET = '!'
 private const val MULTIPLE_ACTION_DELIMITER = ','
 private const val DISTRIBUTION_START = '('
 private const val DISTRIBUTION_END = ')'
@@ -277,10 +280,32 @@ class Grammar {
         if (action.isNotEmpty()) {
             val tokens = action.split(ACTION_OPERATOR)
 
-            val key = tokens[0]
-            val ruleset = tokens[1].split(MULTIPLE_ACTION_DELIMITER).map { Rule(it) }
+            val keyWithOp = tokens[0]
+            val rulesetWithOps = tokens[1].split(MULTIPLE_ACTION_DELIMITER)
 
-            runtimeSymbols[key] = Symbol(key, ruleset)
+            val subtractRuleset = rulesetWithOps
+                    // starts with '-'
+                    .filter { it.startsWith(ACTION_SUBTRACT) }
+                    // remove the '-'
+                    .map { Rule(it.substring(1)) }
+
+            val addRuleset = rulesetWithOps
+                    // since we allow both '+' and _nothing_, here we just check if not '-'
+                    .filter { !it.startsWith(ACTION_SUBTRACT)  }
+                    // remove the '+' if present
+                    .map { Rule(it.removePrefix(ACTION_ADD)) }
+
+            val key = keyWithOp.removePrefix(ACTION_RESET)
+
+            if (keyWithOp.startsWith(ACTION_RESET) || key !in runtimeSymbols) {
+                runtimeSymbols[key] = Symbol(key, addRuleset)
+                return
+            }
+
+            if (key in runtimeSymbols) {
+                val symbol = runtimeSymbols[key]!!
+                runtimeSymbols[key] = Symbol(key, symbol.ruleset - subtractRuleset + addRuleset)
+            }
         }
     }
 
@@ -361,4 +386,6 @@ private fun String.hasRegex(): Boolean = this.contains(REGEX_DELIMITER)
 private fun String.hasModifiers(): Boolean = this.contains(MODIFIER_OPERATOR)
 
 private fun String.substringBetween(delimiter: Char): String = this.substringAfter(delimiter).substringBefore(delimiter)
+
+private fun String.removePrefix(char: Char): String = this.removePrefix(char.toString())
 

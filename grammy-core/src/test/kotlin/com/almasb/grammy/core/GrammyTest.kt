@@ -179,6 +179,17 @@ class GrammyTest {
     }
 
     @Test
+    fun `Add action at runtime`() {
+        Grammy.setRandom(Random(339))
+
+        val json = readJSON("add_action_runtime.json")
+        val grammar = Grammy.createGrammar(json)
+        val expansion = grammar.flatten()
+
+        assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never originalMood2, or originalMood1, or vexed and originalMood1."))
+    }
+
+    @Test
     fun `Regex selection`() {
         for (i in 1..15) {
             com.almasb.grammy.core.Grammy.setRandom(Random(i.toLong()))

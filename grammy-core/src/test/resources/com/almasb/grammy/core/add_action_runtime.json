@@ -1,0 +1,7 @@
+{
+  "name": ["Arjun","Yuuma","Darcy","Mia","Chiaki","Izzi","Azra","Lina"],
+  "animal": ["unicorn","raven","sparrow","scorpion","coyote","eagle","owl","lizard","zebra","duck","kitten"],
+  "mood": ["vexed","indignant","impassioned","wistful","astute","courteous"],
+  "story": ["{hero} [petMood:+{mood}]traveled with her pet {heroPet}. {hero} was never {petMood}, or {petMood}, or {petMood} and {petMood}."],
+  "origin": ["{[hero:{name}][heroPet:{animal}][petMood:originalMood1,originalMood2]story}"]
+}
