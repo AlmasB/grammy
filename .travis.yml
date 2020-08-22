@@ -6,10 +6,16 @@ cache:
   - "~/.m2"
 jdk:
 - openjdk12
+
+before_install:
+- echo "before_install NOOP"
+
 install:
--
+- echo "install NOOP"
+
 after_success:
 - bash <(curl -s https://codecov.io/bash)
+
 notifications:
   email:
     recipients:
