@@ -33,7 +33,7 @@ private const val MODIFIER_OPERATOR = '.'
  *
  * Examples: "some text", "{name}", "The color is {color}."
  */
-class Rule(val text: String) {
+data class Rule(val text: String) {
 
     init {
         if (text.isEmpty())
@@ -74,7 +74,7 @@ class Symbol(val key: String, val ruleset: List<Rule>) {
             throw error("Symbol key cannot be empty")
 
         if (ruleset.isEmpty())
-            throw error("Ruleset cannot be empty")
+            throw error("Ruleset for $key is empty")
 
         val withDistributions = ruleset.filter { it.text.endsWith(")") }
         withoutDistr = ruleset.minus(withDistributions)
