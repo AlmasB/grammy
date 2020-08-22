@@ -112,6 +112,64 @@ What may I do for you? You can ask for Gerard next time you need help. See you!
 Hello! The name's Alice. How do you do? I'll be your digital assistant today. How may I be of service? You can ask for Alice next time you need help. Until next time!
 ```
 
+#### Actions
+
+Actions are a way to create and modify symbols at runtime. For example, the `!` prefix means overwrite.
+
+Input:
+
+```json
+{
+  "origin" : ["[name:Bob][!name:Adam]{story}"],
+  "story" : ["{name}"]
+}
+```
+
+Output:
+
+```
+Adam
+```
+
+---
+
+The `+` prefix means add.
+
+Input:
+
+```json
+{
+  "origin" : ["[name:Bob][name:+Adam]{story}"],
+  "story" : ["{name}"]
+}
+```
+
+Possible outputs are:
+
+```
+Adam
+Bob
+```
+
+---
+
+The `-` prefix means remove.
+
+Input:
+
+```json
+{
+  "origin" : ["[name:Bob,Adam][name:-Adam]{story}"],
+  "story" : ["{name}"]
+}
+```
+
+Output:
+
+```
+Bob
+```
+
 ### Maven
 
 ```
