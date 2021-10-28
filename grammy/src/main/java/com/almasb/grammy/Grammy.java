@@ -1,4 +1,4 @@
-package com.almasb.grammy.core;
+package com.almasb.grammy;
 
 import java.util.Random;
 
@@ -7,18 +7,13 @@ import java.util.Random;
  */
 public final class Grammy {
 
-    // this might be needed in the future to preserve the state
-    private static final Grammy instance = new Grammy();
-
     private Grammy() {}
 
-    static Random random = new Random();
-
     /**
-     * Set random number generator to make Grammy deterministic.
+     * Create empty grammar with given seed.
      */
-    public static void setRandom(Random random) {
-        Grammy.random = random;
+    public static Grammar createGrammar(long seed) {
+        return new Grammar(new Random(seed));
     }
 
     /**
@@ -26,6 +21,15 @@ public final class Grammy {
      */
     public static Grammar createGrammar() {
         return new Grammar();
+    }
+
+    /**
+     * Create grammar from a JSON string in Grammy format with given seed.
+     */
+    public static Grammar createGrammar(long seed, String json) {
+        Grammar grammar = createGrammar(seed);
+        grammar.fromJSON(json);
+        return grammar;
     }
 
     /**

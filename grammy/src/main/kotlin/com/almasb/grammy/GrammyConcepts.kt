@@ -1,8 +1,7 @@
-package com.almasb.grammy.core
+package com.almasb.grammy
 
-import com.almasb.grammy.core.Grammy.random
 import com.fasterxml.jackson.databind.ObjectMapper
-import java.util.HashMap
+import java.util.*
 
 /*
  * The original specification of Grammy by Kate Compton can be found at https://github.com/galaxykate/tracery/tree/tracery2
@@ -64,7 +63,7 @@ data class Rule(val text: String) {
  * Dog and cat will have respectively 30% and 15% chance of being selected, whereas mouse and pig
  * will share the remaining 55% and if the 55% is selected, randomly one of them will be chosen.
  */
-class Symbol(val key: String, val ruleset: List<Rule>) {
+private class Symbol(val random: Random, val key: String, val ruleset: List<Rule>) {
 
     private val distributions = hashMapOf<IntRange, Rule>()
     private val withoutDistr: List<Rule>
@@ -140,31 +139,29 @@ class Symbol(val key: String, val ruleset: List<Rule>) {
  */
 abstract class Modifier(val name: String) {
 
-    abstract fun apply(s: String, vararg args: String): String
+    abstract fun apply(random: Random, s: String, vararg args: String): String
 }
 
 /**
  * A Grammar is a dictionary of **symbols**.
  */
-class Grammar {
+class Grammar(val random: Random = Random()) {
 
-    companion object {
-        /**
-         * Special symbols have a key like normal symbols, but instead of a ruleset,
-         * they are able to produce programmatic values, not hardcoded.
-         */
-        private val specialSymbols: HashMap<String, (String) -> String> = linkedMapOf()
+    /**
+     * Special symbols have a key like normal symbols, but instead of a ruleset,
+     * they are able to produce programmatic values, not hardcoded.
+     */
+    private val specialSymbols: HashMap<String, (String) -> String> = linkedMapOf()
 
-        init {
-            specialSymbols["num"] = { random.nextInt(Int.MAX_VALUE).toString() }
-        }
+    init {
+        specialSymbols["num"] = { random.nextInt(Int.MAX_VALUE).toString() }
     }
 
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
     private val runtimeSymbols: HashMap<String, Symbol> = linkedMapOf()
 
     fun addSymbol(symbolKey: String, ruleset: List<String>) {
-        symbols[symbolKey] = Symbol(symbolKey, ruleset.map { Rule(it) })
+        symbols[symbolKey] = Symbol(random, symbolKey, ruleset.map { Rule(it) })
     }
 
     fun flatten() = flatten("origin")
@@ -298,13 +295,13 @@ class Grammar {
             val key = keyWithOp.removePrefix(ACTION_RESET)
 
             if (keyWithOp.startsWith(ACTION_RESET) || key !in runtimeSymbols) {
-                runtimeSymbols[key] = Symbol(key, addRuleset)
+                runtimeSymbols[key] = Symbol(random, key, addRuleset)
                 return
             }
 
             if (key in runtimeSymbols) {
                 val symbol = runtimeSymbols[key]!!
-                runtimeSymbols[key] = Symbol(key, symbol.ruleset - subtractRuleset + addRuleset)
+                runtimeSymbols[key] = Symbol(random, key, symbol.ruleset - subtractRuleset + addRuleset)
             }
         }
     }
@@ -330,12 +327,12 @@ class Grammar {
 
                 val modifier = ENG_MODIFIERS.find { it.name == modName } ?: throw IllegalArgumentException("Modifier $modName not found!")
 
-                result = modifier.apply(result, *params.toTypedArray())
+                result = modifier.apply(random, result, *params.toTypedArray())
 
             } else {
                 val modifier = ENG_MODIFIERS.find { it.name == name } ?: throw IllegalArgumentException("Modifier $name not found!")
 
-                result = modifier.apply(result)
+                result = modifier.apply(random, result)
             }
         }
 

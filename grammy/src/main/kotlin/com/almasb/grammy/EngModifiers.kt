@@ -1,4 +1,6 @@
-package com.almasb.grammy.core
+package com.almasb.grammy
+
+import java.util.*
 
 /**
  *
@@ -57,10 +59,10 @@ private fun load(): List<Modifier> {
         "a $s"
     }
 
-    add("optional") { s, args ->
+    add("optional") { random, s, args ->
         val chance = if (args.isNotEmpty()) args[0].toInt() else 50
 
-        if (Grammy.random.nextInt(100) < chance)
+        if (random.nextInt(100) < chance)
             s
         else
             ""
@@ -72,8 +74,17 @@ private fun load(): List<Modifier> {
 private fun add(name: String, func: (String, Array<String>) -> String) {
 
     modifiers.add(object : Modifier(name) {
-        override fun apply(s: String, vararg args: String): String {
+        override fun apply(random: Random, s: String, vararg args: String): String {
             return func.invoke(s, args.toList().toTypedArray())
+        }
+    })
+}
+
+private fun add(name: String, func: (Random, String, Array<String>) -> String) {
+
+    modifiers.add(object : Modifier(name) {
+        override fun apply(random: Random, s: String, vararg args: String): String {
+            return func.invoke(random, s, args.toList().toTypedArray())
         }
     })
 }

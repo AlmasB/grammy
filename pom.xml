@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.github.almasb</groupId>
-    <artifactId>grammy</artifactId>
-    <version>0.0.3</version>
+    <artifactId>grammy-lib</artifactId>
+    <version>0.1</version>
     <modules>
-        <module>grammy-core</module>
+        <module>grammy</module>
         <module>grammy-editor</module>
     </modules>
 

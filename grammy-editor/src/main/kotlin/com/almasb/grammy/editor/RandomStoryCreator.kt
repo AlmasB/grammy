@@ -1,6 +1,6 @@
 package com.almasb.grammy.editor
 
-import com.almasb.grammy.core.Grammy
+import com.almasb.grammy.Grammy
 
 /**
  *
@@ -10,7 +10,7 @@ class RandomStoryCreator {
 
     // TODO: words for fwd ref, signpost and things like "however, although, despite"
     fun createStoryAsJSON(): String {
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         val sentenceFormats = listOf(
                 "{noun#.{4}#.capitalize} {verb.s} {noun.a}.",

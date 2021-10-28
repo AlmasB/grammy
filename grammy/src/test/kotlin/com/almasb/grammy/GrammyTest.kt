@@ -1,4 +1,4 @@
-package com.almasb.grammy.core
+package com.almasb.grammy
 
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.*
@@ -21,13 +21,12 @@ import java.util.*
 class GrammyTest {
 
     // TODO: extract common code from tests
-    // TODO: use @BeforeEach to set up grammy random
 
     @Test
     fun `Basic syntax 1`() {
         val json = readJSON("simple1.json")
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(0, json)
         val expandedText = grammar.flatten("animal")
 
         assertThat(expandedText, `is`("unicorn raven"))
@@ -37,7 +36,7 @@ class GrammyTest {
     fun `Basic syntax 2`() {
         val json = readJSON("simple2.json")
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(0, json)
         val expandedText = grammar.flatten("randomAnimal")
 
         assertThat(expandedText, either(`is`("unicorn")).or(`is`("raven")))
@@ -45,16 +44,14 @@ class GrammyTest {
 
     @Test
     fun `Basic syntax 3`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(0))
-
         val json = readJSON("simple3.json")
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        var grammar = Grammy.createGrammar(0, json)
         var expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple owl of the river is called Chiaki"))
 
-        com.almasb.grammy.core.Grammy.setRandom(Random(1))
+        grammar = Grammy.createGrammar(1, json)
         expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple owl of the mountain is called Mia"))
@@ -62,11 +59,9 @@ class GrammyTest {
 
     @Test
     fun `The same symbol expands to random text`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(0))
-
         val json = readJSON("simple4.json")
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(0, json)
         val expandedText = grammar.flatten("sentence")
 
         val tokens = expandedText.split(",")
@@ -76,11 +71,9 @@ class GrammyTest {
 
     @Test
     fun `Modifiers in a sentence`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(15))
-
         val json = readJSON("modifiers.json")
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(15, json)
         val expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("Purple unicorns are always indignant. A kitten is impassioned, unless it is an orange one. Truly!"))
@@ -89,9 +82,7 @@ class GrammyTest {
     @ParameterizedTest
     @MethodSource("modifierArgs")
     fun `Modifiers`(rule: String, modifierName: String, result: String) {
-        com.almasb.grammy.core.Grammy.setRandom(Random(0))
-
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
         grammar.addSymbol("name", listOf(rule))
         grammar.addSymbol("origin", listOf("{name.$modifierName}"))
 
@@ -100,9 +91,7 @@ class GrammyTest {
 
     @Test
     fun `Modifier optional edge case`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(0))
-
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
         grammar.addSymbol("name", listOf("name"))
         grammar.addSymbol("origin", listOf("{name.optional(0)}"))
 
@@ -111,11 +100,9 @@ class GrammyTest {
 
     @Test
     fun `Recursive`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(15))
-
         val json = readJSON("recursive.json")
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(15, json)
         val expandedText = grammar.flatten("sentence")
 
         assertThat(expandedText, `is`("The purple unicorn of the mountain is called Darcy"))
@@ -124,12 +111,9 @@ class GrammyTest {
     @ParameterizedTest
     @ValueSource(strings = arrayOf("nested1.json", "nested2.json"))
     fun `Nested`(jsonFile: String) {
-
-        com.almasb.grammy.core.Grammy.setRandom(Random(15))
-
         val json = readJSON(jsonFile)
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(15, json)
         val expandedText = grammar.flatten("animal")
 
         assertThat(expandedText, either(`is`("zebra")).or(`is`("horse")))
@@ -139,7 +123,7 @@ class GrammyTest {
     fun `Write to JSON`() {
         val json = readJSON("modifiers.json")
 
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(0, json)
         val generated = grammar.toJSON()
 
         assertThat(generated.replace("\n", ""), `is`(json))
@@ -147,10 +131,8 @@ class GrammyTest {
 
     @Test
     fun `Actions`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(5))
-
         val json = readJSON("action.json")
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(5, json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never astute, for the raven was always too impassioned."))
@@ -158,10 +140,8 @@ class GrammyTest {
 
     @Test
     fun `Nested Actions`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(5))
-
         val json = readJSON("nested_actions.json")
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(5, json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("1, 1, 2"))
@@ -169,10 +149,8 @@ class GrammyTest {
 
     @Test
     fun `Action without symbol notation`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(5))
-
         val json = readJSON("action_without_symbol.json")
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(5, json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never courteous, for the raven was always too vexed and vexed."))
@@ -180,10 +158,8 @@ class GrammyTest {
 
     @Test
     fun `Add action at runtime`() {
-        Grammy.setRandom(Random(339))
-
         val json = readJSON("add_action_runtime.json")
-        val grammar = Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(339, json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("Izzi traveled with her pet raven. Izzi was never originalMood2, or originalMood1, or vexed and originalMood1."))
@@ -192,10 +168,8 @@ class GrammyTest {
     @Test
     fun `Regex selection`() {
         for (i in 1..15) {
-            com.almasb.grammy.core.Grammy.setRandom(Random(i.toLong()))
-
             val json = readJSON("regex.json")
-            val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+            val grammar = Grammy.createGrammar(i.toLong(), json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("cow")).or(`is`("sparrow")))
@@ -205,10 +179,8 @@ class GrammyTest {
     @Test
     fun `Regex selection 2`() {
         for (i in 1..15) {
-            com.almasb.grammy.core.Grammy.setRandom(Random(i.toLong()))
-
             val json = readJSON("regex2.json")
-            val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+            val grammar = Grammy.createGrammar(i.toLong(), json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("cow")).or(`is`("duck")))
@@ -218,10 +190,8 @@ class GrammyTest {
     @Test
     fun `Regex selection 3`() {
         for (i in 1..15) {
-            com.almasb.grammy.core.Grammy.setRandom(Random(i.toLong()))
-
             val json = readJSON("regex3.json")
-            val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+            val grammar = Grammy.createGrammar(i.toLong(), json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("coyote")).or(`is`("eagle")))
@@ -230,10 +200,8 @@ class GrammyTest {
 
     @Test
     fun `Num keyword`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(5))
-
         val json = readJSON("num.json")
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(5, json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("There are 1568779487 ravens with 189533474 different colors, but mainly grey."))
@@ -242,10 +210,8 @@ class GrammyTest {
     @Test
     fun `Distribution in selection`() {
         for (i in 1..50) {
-            com.almasb.grammy.core.Grammy.setRandom(Random(i.toLong() * 100))
-
             val json = readJSON("distribution.json")
-            val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+            val grammar = Grammy.createGrammar(i.toLong() * 100, json)
             val expansion = grammar.flatten("randomAnimal")
 
             assertThat(expansion, either(`is`("unicorn")).or(`is`("raven")))
@@ -254,10 +220,8 @@ class GrammyTest {
 
     @Test
     fun `Story`() {
-        com.almasb.grammy.core.Grammy.setRandom(Random(99))
-
         val json = readJSON("story.json")
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar(json)
+        val grammar = Grammy.createGrammar(99, json)
         val expansion = grammar.flatten()
 
         assertThat(expansion, `is`("Krox was a great baker, and this song tells of her adventure. Krox baked bread, then she made croissants, then she went home to read a book."))
@@ -274,7 +238,7 @@ class GrammyTest {
 
     @Test
     fun `A rule cannot be empty`() {
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(GrammySyntaxException::class.java, {
             grammar.addSymbol("key", listOf(""))
@@ -283,7 +247,7 @@ class GrammyTest {
 
     @Test
     fun `A symbol key cannot be empty`() {
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(GrammySyntaxException::class.java, {
             grammar.addSymbol("", listOf("rule1", "rule2"))
@@ -292,7 +256,7 @@ class GrammyTest {
 
     @Test
     fun `A symbol ruleset cannot be empty`() {
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(GrammySyntaxException::class.java, {
             grammar.addSymbol("key", listOf())
@@ -301,7 +265,7 @@ class GrammyTest {
 
     @Test
     fun `A symbol total rule distribution value does not exceed 100`() {
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(GrammySyntaxException::class.java, {
             grammar.addSymbol("key", listOf("rule1(50)", "rule2(51)"))
@@ -310,7 +274,7 @@ class GrammyTest {
 
     @Test
     fun `Fail if grammar has no starting symbol`() {
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
 
         assertThrows(GrammySyntaxException::class.java, {
             grammar.flatten()
@@ -319,7 +283,7 @@ class GrammyTest {
 
     @Test
     fun `Fail if no matching regex`() {
-        val grammar = com.almasb.grammy.core.Grammy.createGrammar()
+        val grammar = Grammy.createGrammar()
         grammar.addSymbol("name", listOf("text"))
         grammar.addSymbol("origin", listOf("{name#...#}"))
 
