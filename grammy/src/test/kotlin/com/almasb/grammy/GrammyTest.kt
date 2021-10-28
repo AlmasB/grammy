@@ -234,6 +234,14 @@ class GrammyTest {
         assertThat(grammar.flatten(), `is`("Zelph was a great baker, and this song tells of her adventure. Zelph iced a cake, then she decorated cupcakes, then she went home to read a book."))
     }
 
+    @Test
+    fun `Modify symbols at runtime with add and remove`() {
+        val json = readJSON("add_remove_symbols.json")
+        val grammar = Grammy.createGrammar(json)
+
+        assertThat(grammar.flatten(), `is`("delighted"))
+    }
+
     // FORMAL DEFINITION TESTS
 
     @Test

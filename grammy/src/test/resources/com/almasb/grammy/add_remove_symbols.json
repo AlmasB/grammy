@@ -1,0 +1,4 @@
+{
+  "emotion": ["happy"],
+  "origin": ["[!emotion:delighted]{emotion}"]
+}

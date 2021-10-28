@@ -63,7 +63,7 @@ data class Rule(val text: String) {
  * Dog and cat will have respectively 30% and 15% chance of being selected, whereas mouse and pig
  * will share the remaining 55% and if the 55% is selected, randomly one of them will be chosen.
  */
-private class Symbol(val random: Random, val key: String, val ruleset: List<Rule>) {
+private open class Symbol(val random: Random, val key: String, val ruleset: List<Rule>) {
 
     private val distributions = hashMapOf<IntRange, Rule>()
     private val withoutDistr: List<Rule>
@@ -126,6 +126,9 @@ private class Symbol(val random: Random, val key: String, val ruleset: List<Rule
     }
 }
 
+private class RuntimeSymbol(random: Random, key: String, ruleset: List<Rule>)
+    : Symbol(random, key, ruleset)
+
 /**
  * A modifier is a function that takes a string (and optionally parameters) and returns a string.
  * A modifier can only be applied to a symbol key.
@@ -158,7 +161,6 @@ class Grammar(val random: Random = Random()) {
     }
 
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
-    private val runtimeSymbols: HashMap<String, Symbol> = linkedMapOf()
 
     fun addSymbol(symbolKey: String, ruleset: List<String>) {
         symbols[symbolKey] = Symbol(random, symbolKey, ruleset.map { Rule(it) })
@@ -294,20 +296,20 @@ class Grammar(val random: Random = Random()) {
 
             val key = keyWithOp.removePrefix(ACTION_RESET)
 
-            if (keyWithOp.startsWith(ACTION_RESET) || key !in runtimeSymbols) {
-                runtimeSymbols[key] = Symbol(random, key, addRuleset)
+            if (keyWithOp.startsWith(ACTION_RESET) || key !in symbols) {
+                symbols[key] = RuntimeSymbol(random, key, addRuleset)
                 return
             }
 
-            if (key in runtimeSymbols) {
-                val symbol = runtimeSymbols[key]!!
-                runtimeSymbols[key] = Symbol(random, key, symbol.ruleset - subtractRuleset + addRuleset)
+            if (key in symbols) {
+                val symbol = symbols[key]!!
+                symbols[key] = Symbol(random, key, symbol.ruleset - subtractRuleset + addRuleset)
             }
         }
     }
 
     private fun getSymbol(name: String): Symbol {
-        return symbols[name] ?: runtimeSymbols[name] ?: throw error("Symbol key \"$name\" not found!")
+        return symbols[name] ?: throw error("Symbol key \"$name\" not found!")
     }
 
     /**
@@ -344,7 +346,6 @@ class Grammar(val random: Random = Random()) {
      */
     fun fromJSON(json: String) {
         symbols.clear()
-        runtimeSymbols.clear()
 
         val rootObject = ObjectMapper().readTree(json)
 

@@ -114,7 +114,11 @@ Hello! The name's Alice. How do you do? I'll be your digital assistant today. Ho
 
 #### Actions
 
-Actions are a way to create and modify symbols at runtime. Currently, actions only modify symbols that were created at runtime. For example, the `!` prefix means overwrite.
+Actions are a way to create and modify symbols at runtime.
+
+---
+
+The `!` prefix means overwrite.
 
 Input:
 
@@ -133,7 +137,7 @@ Adam
 
 ---
 
-The `+` prefix means add.
+The `+` prefix (or without a prefix) means add.
 
 Input:
 
