@@ -73,7 +73,7 @@
 
         <!-- dependencies -->
         <jfx.version>17.0.0.1</jfx.version>
-        <kotlin.version>1.5.10</kotlin.version>
+        <kotlin.version>1.6.0</kotlin.version>
         <jackson.version>2.12.1</jackson.version>
 
         <!-- test dependencies -->
