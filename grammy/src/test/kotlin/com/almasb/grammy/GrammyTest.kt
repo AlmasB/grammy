@@ -252,6 +252,18 @@ class GrammyTest {
         assertThat(grammar.flatten(), `is`("delighted"))
     }
 
+    @Test
+    fun `Symbols returns both normal and special symbols`() {
+        val json = readJSON("add_action_runtime.json")
+        val grammar = Grammy.createGrammar(json)
+
+        assertThat(grammar.symbolKeys, contains("name", "animal", "mood", "story", "origin", "num"))
+
+        grammar.flatten()
+
+        assertThat(grammar.symbolKeys, contains("name", "animal", "mood", "story", "origin", "hero", "heroPet", "petMood", "num"))
+    }
+
     // FORMAL DEFINITION TESTS
 
     @Test

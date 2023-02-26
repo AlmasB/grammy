@@ -162,6 +162,9 @@ class Grammar(val random: Random = Random()) {
 
     private val symbols: HashMap<String, Symbol> = linkedMapOf()
 
+    val symbolKeys: List<String>
+        get() = symbols.keys.toList() + specialSymbols.keys
+
     fun addSymbol(symbolKey: String, ruleset: List<String>) {
         symbols[symbolKey] = Symbol(random, symbolKey, ruleset.map { Rule(it) })
     }
