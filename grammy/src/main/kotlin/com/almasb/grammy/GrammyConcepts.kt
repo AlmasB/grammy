@@ -180,7 +180,7 @@ class Grammar(val random: Random = Random()) {
     /**
      * Fully expand given string, i.e. the returned value will not have symbols or actions.
      */
-    private fun expand(s: String): String {
+    fun expand(s: String): String {
         if (!(s.hasSymbols() || s.hasActions()))
             return s
 

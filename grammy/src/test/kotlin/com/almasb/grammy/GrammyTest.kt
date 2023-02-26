@@ -58,6 +58,16 @@ class GrammyTest {
     }
 
     @Test
+    fun `Expand does not flatten`() {
+        val json = readJSON("simple1.json")
+
+        val grammar = Grammy.createGrammar(0, json)
+        val expandedText = grammar.expand("{animal}")
+
+        assertThat(expandedText, either(`is`("unicorn")).or(`is`("raven")))
+    }
+
+    @Test
     fun `The same symbol expands to random text`() {
         val json = readJSON("simple4.json")
 
