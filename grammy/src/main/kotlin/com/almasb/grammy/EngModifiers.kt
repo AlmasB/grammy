@@ -17,11 +17,11 @@ private fun load(): List<Modifier> {
     // the expanded text, s, is guaranteed to be non-empty
 
     add("capitalize") { s, _ ->
-        s.first().toUpperCase() + s.drop(1)
+        s.first().uppercase() + s.drop(1)
     }
 
     add("capitalizeAll") { s, _ ->
-        s.toUpperCase()
+        s.uppercase()
     }
 
     add("s") { s, _ ->

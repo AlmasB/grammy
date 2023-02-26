@@ -166,6 +166,9 @@ class Grammar(val random: Random = Random()) {
         symbols[symbolKey] = Symbol(random, symbolKey, ruleset.map { Rule(it) })
     }
 
+    /**
+     * Flattens and expands the "origin" symbol.
+     */
     fun flatten() = flatten("origin")
 
     fun flatten(startSymbolKey: String): String {
