@@ -2,7 +2,6 @@
 This is a JVM port of Kate Compton's story-grammar generator - [Tracery](https://github.com/galaxykate/tracery) 
 
 ![Maven](https://img.shields.io/maven-central/v/com.github.almasb/grammy.svg)
-[![Build Status](https://travis-ci.org/AlmasB/grammy.svg?branch=master)](https://travis-ci.org/AlmasB/grammy)
 [![codecov](https://codecov.io/gh/AlmasB/grammy/branch/master/graph/badge.svg)](https://codecov.io/gh/AlmasB/grammy)
 
 ### Usage
@@ -180,27 +179,19 @@ Bob
 <dependency>
     <groupId>com.github.almasb</groupId>
     <artifactId>grammy</artifactId>
-    <version>0.0.2</version>
+    <version>0.1.2</version>
 </dependency>
 ```
 
 ### Gradle
 
 ```
-compile 'com.github.almasb:grammy:0.0.2'
+compile 'com.github.almasb:grammy:0.1.2'
 ```
-
-### Uber-jar
-
-Pre-compiled version available from [Releases](https://github.com/AlmasB/grammy/releases).
 
 ### Notes
 
-This implementation only loosely follows the [original specification](https://github.com/galaxykate/tracery/tree/tracery2) by Kate Compton.
+This implementation only loosely follows the [original specification](https://github.com/galaxykate/tracery/tree/tracery2) by Kate Compton and adds custom syntax for extra functionality.
 So, given the same data, the output may differ.
 
 The word list is used from [wordlist](https://github.com/aaronbassett/Pass-phrase).
-
-### Contact
-
-![Gmail](https://img.shields.io/badge/email-almaslvl@gmail.com-red.svg)
