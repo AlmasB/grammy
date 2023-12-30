@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.github.almasb</groupId>
         <artifactId>grammy-lib</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </parent>
 
     <artifactId>grammy-zdeploy</artifactId>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.github.almasb</groupId>
             <artifactId>grammy-editor</artifactId>
-            <version>0.1.2</version>
+            <version>0.1.3</version>
         </dependency>
     </dependencies>
 

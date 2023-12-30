@@ -4,7 +4,7 @@
 
     <groupId>com.github.almasb</groupId>
     <artifactId>grammy-lib</artifactId>
-    <version>0.1.2</version>
+    <version>0.1.3</version>
     <modules>
         <module>grammy</module>
         <module>grammy-editor</module>
